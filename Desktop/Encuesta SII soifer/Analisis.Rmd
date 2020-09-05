@@ -1,0 +1,64 @@
+---
+title: "Encuesta SII"
+author: "Ale"
+date: "2 de septiembre de 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Cargo todas las librerías que voy a usar
+
+```{r echo=TRUE, results='hide'}
+library(tidyverse)
+library(dplyr)
+library(gapminder)
+library(readxl)
+```
+
+## Cargo las bases de datos y creo una sola tabla con las columnas de Saavedra. 
+
+```{r}
+encuesta <- read.csv("C:/Users/Ale/Desktop/Encuesta SII soifer/SII en Argentina.csv")
+                       
+head(encuesta)
+tail(encuesta)
+colnames(encuesta)
+str(encuesta)
+
+names(encuesta)[1:66] <- c(1:66)
+```
+## Limpio las preguntas
+
+```{r}
+names(encuesta) <- c("Fecha", "DNI", "Edad", "Género","Povincia de residencia", "Ciudad donde ejerce", "Orientación prioritaria","Lugar de Trabajo", "Proporcion de pacientes con SII mensual", "Criterio diagnóstico SII", "¿Existe SII sin dolor?", "Variante más frecuente", "Variantes que puede pasar por alto una patología orgánica", "Fisiopatología más frecuente variante diarrea", "Fisiopatología más frecuente variante constipación", "Variantes con más psico-comorbilidad", "Variantes con menos alternativas terapéuticas", "Loperamida en variante diarrea", "Carbón en variante diarrea", "Bismuto en variante diarrea", "Rifaximina en variante diarrea", "Otros ATB en variante diarrea", "Probióticos en variante diarrea", "Trimebutina en variante diarrea", "Trimebutina/simeticona en variante diarrea", "Alverina/simeticona en variante diarrea", "Pinaverio en variante diarrea", "Otilonio en variante diarrea", "Colestiramina en variante diarrea", "Amitriptilina en variante diarrea", "Antiespasmódicos ansiolíticos en variante diarrea", "Dieta en variante diarrea", "Polietilenglicol en variante estreñimiento", "Psyllium en variante estreñimiento", "Lactulosa en variante estreñimiento", "Linaclotida en variante estreñimiento", "Prucalopride en variante estreñimiento", "Sales biliares en variante estreñimiento", "Trimebutina en variante estreñimiento", "Bisacodilo/picosulfato en variante estreñimiento", "Antibióticos en variante estreñimiento", "Senósidos en variante estreñimiento", "Dieta en variante estreñimiento", "¿Considera primero evitar medicación y emplear dieta y productos naturales?", "Indicación de antidepresivos", "Utiliza terapias alternativas en el SII", "Meta principal endel tratamiento del SII", "Nivel de frustración si el paciente no mejora en las primeras 2-3 consultas", "Cree que el tratamiento es más complejo cuando el género del paciente es:", "¿Le desagrada que el paciente concurra con información de internet y discuta con ud?", "¿Qué perfil/es de personalidad de su paciente le resula más dificil abordar?", "¿Preferiría de ser posible dejar de atender este tipo de pacientes?", "Con respecto a los estudios previos del paciente", "¿Cuánto tiempo le demanda el paciente funcional en relación a otras patologías¿", "En caso que considere que le lleva más tiempo, ¿Eso lo incomoda?", "Considera que estuchar al paciente:", "¿Qué tipo de escucha realiza?", "En caso de considerar que su escucha es insuficiente, esto se debe a:", "¿Cuánto tiempo le dedica a la primera consulta?", "Considera que la educación que se le brinda a los pacientes:", "¿Cuánto del tratamiento considera que depende del paciente?", "¿Cree que los pacientes con SII se preocupan demasiado por su trastorno?", "¿Cree que los pacientes con SII consultan principalmente por miedo a padecer cáncer?", "¿Considera que el componente psicológico en estos pacientes es más importante que el biológico?", "¿Considera que estos pacientes deben ser derivados a una terapia psicológica?", "Trabaja ud. en equipo con:", "¿Cuál es su vía de comunicación preferente con su paciente?", "¿Pregunta sobre la posibilidad de abusos como disparadores de la sintomatología?", "Si la respuesta es afirmativa, ¿Lo interroga en la primera consulta?", "¿Pregunta de la misma manera sobre abuso si el paciente es hombre o mujer?", "¿Cuán satisfecho se encuentra con su práctica clínica en el paciente con SII?", "¿Qué otras condiciones siente que necesitaría para optimizarla?")
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
