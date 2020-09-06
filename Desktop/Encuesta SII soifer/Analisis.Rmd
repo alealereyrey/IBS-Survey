@@ -38,8 +38,23 @@ names(encuesta) <- c("Fecha", "DNI", "Edad", "Género","Povincia de residencia",
 
 ```
 
+## Calculo mínimos y máximos de edad de gastros y las medidas de distribución central y CI
 
+```{r}
 
+min(encuesta$Edad)
+max(encuesta$Edad)
+mean(encuesta$Edad)
+median(encuesta$Edad)
+Rmisc::CI(encuesta$Edad, ci = 0.95)
+
+getmode <- function(x) {
+   uniq <- unique(x)
+   uniq[which.max(tabulate(match(x, uniq)))]
+}
+
+getmode(encuesta$Edad)
+```
 
 
 
