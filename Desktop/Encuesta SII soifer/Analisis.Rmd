@@ -21,7 +21,7 @@ library(readxl)
 ## Cargo las bases de datos y creo una sola tabla con las columnas de Saavedra. 
 
 ```{r}
-encuesta <- read.csv("C:/Users/Ale/Desktop/Encuesta SII soifer/SII en Argentina.csv", fileEncoding = "UTF-8")
+encuesta <- read.csv("C:/Users/Ale/Desktop/Encuesta SII soifer/SII en Argentina.csv", fileEncoding = "UTF-8", na.strings="")
                        
 head(encuesta)
 tail(encuesta)
@@ -33,7 +33,7 @@ names(encuesta)[1:66] <- c(1:66)
 ## Limpio las preguntas
 
 ```{r}
-names(encuesta) <- c("Fecha", "DNI", "Edad", "Genero","Povincia de residencia", "Ciudad donde ejerce", "Orientación prioritaria","Lugar de Trabajo", "Proporcion de pacientes con SII mensual", "Criterio diagnóstico SII", "¿Existe SII sin dolor?", "Variante más frecuente", "Variantes que puede pasar por alto una patología orgánica", "Fisiopatología más frecuente variante diarrea", "Fisiopatología más frecuente variante constipación", "Variantes con más psico-comorbilidad", "Variantes con menos alternativas terapéuticas", "Loperamida en variante diarrea", "Carbón en variante diarrea", "Bismuto en variante diarrea", "Rifaximina en variante diarrea", "Otros ATB en variante diarrea", "Probióticos en variante diarrea", "Trimebutina en variante diarrea", "Trimebutina/simeticona en variante diarrea", "Alverina/simeticona en variante diarrea", "Pinaverio en variante diarrea", "Otilonio en variante diarrea", "Colestiramina en variante diarrea", "Amitriptilina en variante diarrea", "Antiespasmódicos ansiolíticos en variante diarrea", "Dieta en variante diarrea", "Polietilenglicol en variante estreñimiento", "Psyllium en variante estreñimiento", "Lactulosa en variante estreñimiento", "Linaclotida en variante estreñimiento", "Prucalopride en variante estreñimiento", "Sales biliares en variante estreñimiento", "Trimebutina en variante estreñimiento", "Bisacodilo/picosulfato en variante estreñimiento", "Antibióticos en variante estreñimiento", "Senósidos en variante estreñimiento", "Dieta en variante estreñimiento", "¿Considera primero evitar medicación y emplear dieta y productos naturales?", "Indicación de antidepresivos", "Utiliza terapias alternativas en el SII", "Meta principal endel tratamiento del SII", "Nivel de frustración si el paciente no mejora en las primeras 2-3 consultas", "Cree que el tratamiento es más complejo cuando el género del paciente es:", "¿Le desagrada que el paciente concurra con información de internet y discuta con ud?", "¿Qué perfil/es de personalidad de su paciente le resula más dificil abordar?", "¿Preferiría de ser posible dejar de atender este tipo de pacientes?", "Con respecto a los estudios previos del paciente", "¿Cuánto tiempo le demanda el paciente funcional en relación a otras patologías¿", "En caso que considere que le lleva más tiempo, ¿Eso lo incomoda?", "Considera que estuchar al paciente:", "¿Qué tipo de escucha realiza?", "En caso de considerar que su escucha es insuficiente, esto se debe a:", "¿Cuánto tiempo le dedica a la primera consulta?", "Considera que la educación que se le brinda a los pacientes:", "¿Cuánto del tratamiento considera que depende del paciente?", "¿Cree que los pacientes con SII se preocupan demasiado por su trastorno?", "¿Cree que los pacientes con SII consultan principalmente por miedo a padecer cáncer?", "¿Considera que el componente psicológico en estos pacientes es más importante que el biológico?", "¿Considera que estos pacientes deben ser derivados a una terapia psicológica?", "Trabaja ud. en equipo con:", "¿Cuál es su vía de comunicación preferente con su paciente?", "¿Pregunta sobre la posibilidad de abusos como disparadores de la sintomatología?", "Si la respuesta es afirmativa, ¿Lo interroga en la primera consulta?", "¿Pregunta de la misma manera sobre abuso si el paciente es hombre o mujer?", "¿Cuán satisfecho se encuentra con su práctica clínica en el paciente con SII?", "¿Qué otras condiciones siente que necesitaría para optimizarla?")
+names(encuesta) <- c("Fecha", "DNI", "Edad", "Genero","Provincia de residencia", "Ciudad donde ejerce", "Orientación prioritaria","Lugar de Trabajo", "Proporcion de pacientes con SII mensual", "Criterio diagnóstico SII", "¿Existe SII sin dolor?", "Variante más frecuente", "Variantes que puede pasar por alto una patología orgánica", "Fisiopatología más frecuente variante diarrea", "Fisiopatología más frecuente variante constipación", "Variantes con más psico-comorbilidad", "Variantes con menos alternativas terapéuticas", "Loperamida en variante diarrea", "Carbón en variante diarrea", "Bismuto en variante diarrea", "Rifaximina en variante diarrea", "Otros ATB en variante diarrea", "Probióticos en variante diarrea", "Trimebutina en variante diarrea", "Trimebutina/simeticona en variante diarrea", "Alverina/simeticona en variante diarrea", "Pinaverio en variante diarrea", "Otilonio en variante diarrea", "Colestiramina en variante diarrea", "Amitriptilina en variante diarrea", "Antiespasmódicos ansiolíticos en variante diarrea", "Dieta en variante diarrea", "Polietilenglicol en variante estreñimiento", "Psyllium en variante estreñimiento", "Lactulosa en variante estreñimiento", "Linaclotida en variante estreñimiento", "Prucalopride en variante estreñimiento", "Sales biliares en variante estreñimiento", "Trimebutina en variante estreñimiento", "Bisacodilo/picosulfato en variante estreñimiento", "Antibióticos en variante estreñimiento", "Senósidos en variante estreñimiento", "Dieta en variante estreñimiento", "¿Considera primero evitar medicación y emplear dieta y productos naturales?", "Indicación de antidepresivos", "Utiliza terapias alternativas en el SII", "Meta principal endel tratamiento del SII", "Nivel de frustración si el paciente no mejora en las primeras 2-3 consultas", "Cree que el tratamiento es más complejo cuando el género del paciente es:", "¿Le desagrada que el paciente concurra con información de internet y discuta con ud?", "¿Qué perfil/es de personalidad de su paciente le resula más dificil abordar?", "¿Preferiría de ser posible dejar de atender este tipo de pacientes?", "Con respecto a los estudios previos del paciente", "¿Cuánto tiempo le demanda el paciente funcional en relación a otras patologías¿", "En caso que considere que le lleva más tiempo, ¿Eso lo incomoda?", "Considera que estuchar al paciente:", "¿Qué tipo de escucha realiza?", "En caso de considerar que su escucha es insuficiente, esto se debe a:", "¿Cuánto tiempo le dedica a la primera consulta?", "Considera que la educación que se le brinda a los pacientes:", "¿Cuánto del tratamiento considera que depende del paciente?", "¿Cree que los pacientes con SII se preocupan demasiado por su trastorno?", "¿Cree que los pacientes con SII consultan principalmente por miedo a padecer cáncer?", "¿Considera que el componente psicológico en estos pacientes es más importante que el biológico?", "¿Considera que estos pacientes deben ser derivados a una terapia psicológica?", "Trabaja ud. en equipo con:", "¿Cuál es su vía de comunicación preferente con su paciente?", "¿Pregunta sobre la posibilidad de abusos como disparadores de la sintomatología?", "Si la respuesta es afirmativa, ¿Lo interroga en la primera consulta?", "¿Pregunta de la misma manera sobre abuso si el paciente es hombre o mujer?", "¿Cuán satisfecho se encuentra con su práctica clínica en el paciente con SII?", "¿Qué otras condiciones siente que necesitaría para optimizarla?")
 
 
 ```
@@ -44,6 +44,32 @@ Una de las observaciones que dice hombre;mujer, la renombro hombre.
 
 ```{r}
 encuesta$Genero[181] <- "Hombre"
+
+unique(encuesta$`Ciudad donde ejerce`)
+
+encuesta <- encuesta %>%
+                mutate(`Provincia de residencia` = case_when(str_detect(`Provincia de residencia`, regex("caba|C.A.B.A|ciudad|capital|a(i|u)res|bs as", ignore_case = T)) ~"Buenos Aires", 
+                                                             str_detect(`Provincia de residencia`, regex("c(o|ó)rdoba", ignore_case = T)) ~ "Córdoba",
+                                                             str_detect(`Provincia de residencia`, regex("chubut", ignore_case = T)) ~ "Chubut",
+                                                             str_detect(`Provincia de residencia`, regex("entre r(i|í)os", ignore_case = T)) ~ "Entre Ríos",
+                                                             str_detect(`Provincia de residencia`, regex("negro", ignore_case = T)) ~ "Río Negro",
+                                                             str_detect(`Provincia de residencia`, regex("neuqu(e|é)n", ignore_case = T)) ~ "Neuquén",
+                                                             str_detect(`Provincia de residencia`, regex("chac", ignore_case = T)) ~ "Chaco",
+                                                             str_detect(`Provincia de residencia`, regex("tuc", ignore_case = T)) ~ "Tucumán",
+                                                             str_detect(`Provincia de residencia`, regex("santa fe|sta fe|sfe", ignore_case = T)) ~ "Santa Fe", T ~ `Provincia de residencia`),
+                       `Ciudad donde ejerce`= case_when(str_detect(`Ciudad donde ejerce`, regex("C.A.B.A.|CABA|Buenos|bs as|Capital|Morón|Pilar|Lujan|La plata|Varela|Mejía|Quilmes|Palomar|Isidro|Vicente|cas|Zamora|Campana|argentina", ignore_case = T)) ~ "AMBA",
+                                                        str_detect(`Ciudad donde ejerce`, regex("mar del plata", ignore_case = T)) ~ "Mar del plata",
+                                                        str_detect(`Ciudad donde ejerce`, regex("resistencia", ignore_case = T)) ~ "Resistencia",
+                                                        str_detect(`Ciudad donde ejerce`, regex("mendoza", ignore_case = T)) ~ "Mendoza",
+                                                        str_detect(`Ciudad donde ejerce`, regex("salta", ignore_case = T)) ~ "Salta",
+                                                        str_detect(`Ciudad donde ejerce`, regex("rosario", ignore_case = T)) ~ "Rosario",
+                                                        str_detect(`Ciudad donde ejerce`, regex("c(o|ó)rdoba", ignore_case = T)) ~ "Córdoba",
+                                                        str_detect(`Ciudad donde ejerce`, regex("Peña", ignore_case = T)) ~ "PR Saenz Peña",
+                                                        str_detect(`Ciudad donde ejerce`, regex("General Roca", ignore_case = T)) ~ "Gral Roca",
+                                                        str_detect(`Ciudad donde ejerce`, regex("Pico", ignore_case = T)) ~ "Gral Pico",
+                                                        str_detect(`Ciudad donde ejerce`, regex("Paran(a|á)", ignore_case = T)) ~ "Paraná",
+                                                        str_detect(`Ciudad donde ejerce`, regex("tucuman|SMT", ignore_case = T)) ~ "SM Tucuman",
+                                                   T ~ `Ciudad donde ejerce`))
 
 ```
 
@@ -88,16 +114,71 @@ dfpiramide2 <- dfpiramide %>%
 piramide <- ggplot(dfpiramide2, aes(x = Edad, y = Especialistas, fill = Genero)) + 
   geom_bar(stat = "identity") + 
                  coord_flip() + 
-       scale_y_continuous(breaks = seq(-40, 40, by = 5), 
-                     labels = c(rev(seq(0, 40, by = 5)), seq(2, 40, by = 5))) + 
-  scale_fill_brewer(palette = "Set1") + 
-  theme_bw()
+               scale_y_continuous(breaks = seq(-40, 40, by = 5), 
+                     labels = c(rev(seq(0, 40, by = 5)), seq(5, 40, by = 5))) + 
+  scale_fill_manual(values = c("cornflowerblue", "#E76BF3")) 
 
 piramide
 
 ```
 
 
+## Calculo la distribución geográfica de los especialistas según provincia
+Veo que falta tidy. 
+
+```{r}
+
+head(encuesta)
+
+distribucion_residencia <- encuesta%>%
+                        group_by(Genero)%>%
+                        count(`Provincia de residencia`, `Ciudad donde ejerce`, name = "Especialistas") %>%
+                        ungroup()
+
+
+grafico_residencia <- ggplot(distribucion_residencia, aes(x = `Provincia de residencia`, y = Especialistas, fill = Genero)) +
+                                     geom_bar(stat = "identity", position = "dodge", na.rm = T) +
+                                coord_flip() + 
+                   scale_y_continuous(breaks = seq(0, 90, by = 10)) +
+                   labs(title = "Provincia de residencia") +
+                           scale_fill_manual(values = c("cornflowerblue", "#E76BF3"))
+
+grafico_residencia
+
+```
+
+```{r}
+ciudad_buenos_aires <- distribucion_residencia %>%
+                                filter(distribucion_residencia$`Provincia de residencia` %in% "Buenos Aires")
+
+grafico_ciudad_buenos_aires <- ggplot(ciudad_buenos_aires,
+                          aes(x = `Ciudad donde ejerce`, y = Especialistas, fill = `Ciudad donde ejerce`)) +
+                        geom_bar(position = "dodge", stat = "identity") +
+                              theme_bw() +
+        coord_flip()
+        labs(title = "Ciudad de ejercicio de la profesión") 
+        
+                          
+resto_del_pais <- distribucion_residencia %>%
+                 filter(distribucion_residencia$`Provincia de residencia` != "Buenos Aires")
+
+
+grafico_resto_del_pais<- ggplot(resto_del_pais,
+                          aes(x = `Provincia de residencia`, y = Especialistas, fill = `Ciudad donde ejerce`)) +
+                        geom_bar(position = "dodge", stat = "identity") +
+                              theme_bw() +
+                        coord_flip()
+                         labs(title = "Ciudad de ejercicio de la profesión") +
+                facet_grid(~`Provincia de residencia`)
+
+                         
+                         
+grafico_resto_del_pais                         
+                         
+                         
+                         
+grafico_ciudad_buenos_aires
+```
 
 
 
