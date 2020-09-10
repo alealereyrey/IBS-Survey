@@ -56,9 +56,13 @@ encuesta <- encuesta %>%
                                                              str_detect(`Provincia de residencia`, regex("neuqu(e|é)n", ignore_case = T)) ~ "Neuquén",
                                                              str_detect(`Provincia de residencia`, regex("chac", ignore_case = T)) ~ "Chaco",
                                                              str_detect(`Provincia de residencia`, regex("tuc", ignore_case = T)) ~ "Tucumán",
+                                                             str_detect(`Provincia de residencia`, regex("salta", ignore_case = T)) ~ "Salta",
+                                                             str_detect(`Provincia de residencia`, regex("mendoza", ignore_case = T)) ~ "Mendoza",
+                                                              str_detect(`Provincia de residencia`, regex("Formosa", ignore_case = T)) ~ "Formosa",
+                                                              str_detect(`Provincia de residencia`, regex("rioja", ignore_case = T)) ~ "La Rioja",
+                                                              str_detect(`Provincia de residencia`, regex("santiago del estero", ignore_case = T)) ~ "Santiago del Estero",
                                                              str_detect(`Provincia de residencia`, regex("santa fe|sta fe|sfe", ignore_case = T)) ~ "Santa Fe", T ~ `Provincia de residencia`),
-                       `Ciudad donde ejerce`= case_when(str_detect(`Ciudad donde ejerce`, regex("C.A.B.A.|CABA|Buenos|bs as|Capital|Morón|Pilar|Lujan|La plata|Varela|Mejía|Quilmes|Palomar|Isidro|Vicente|cas|Zamora|Campana|argentina", ignore_case = T)) ~ "AMBA",
-                                                        str_detect(`Ciudad donde ejerce`, regex("mar del plata", ignore_case = T)) ~ "Mar del plata",
+                       `Ciudad donde ejerce`= case_when(str_detect(`Ciudad donde ejerce`, regex("mar del plata", ignore_case = T)) ~ "Mar del plata",
                                                         str_detect(`Ciudad donde ejerce`, regex("resistencia", ignore_case = T)) ~ "Resistencia",
                                                         str_detect(`Ciudad donde ejerce`, regex("mendoza", ignore_case = T)) ~ "Mendoza",
                                                         str_detect(`Ciudad donde ejerce`, regex("salta", ignore_case = T)) ~ "Salta",
@@ -69,9 +73,26 @@ encuesta <- encuesta %>%
                                                         str_detect(`Ciudad donde ejerce`, regex("Pico", ignore_case = T)) ~ "Gral Pico",
                                                         str_detect(`Ciudad donde ejerce`, regex("Paran(a|á)", ignore_case = T)) ~ "Paraná",
                                                         str_detect(`Ciudad donde ejerce`, regex("tucuman|SMT", ignore_case = T)) ~ "SM Tucuman",
+                                                        str_detect(`Ciudad donde ejerce`, regex("C.A.B.A.|CABA|Buenos|bs as|capital federal|capital$|Morón|Pilar|Lujan|La plata|Varela|Mejía|Quilmes|Palomar|Isidro|Vicente|cas$|Zamora|Campana|argentina", ignore_case = T)) & `Provincia de residencia` == "Buenos Aires"  ~ "AMBA",
                                                    T ~ `Ciudad donde ejerce`))
 
 ```
+
+## Creo un gráfico nuevo agrupando provincias por regiones
+
+```{r}
+
+encuesta <- encuesta %>%
+        mutate(`Región de residencia` = case_when(`Provincia de residencia` %in% c("Salta", "Jujuy", "Santiago del Estero", "Catamarca", "Tucumán", "La Rioja") ~ "NOA", 
+                                                  `Provincia de residencia` %in% c("Formosa", "Chaco", "Misiones", "Corrientes") ~"NEA",
+                                                  `Provincia de residencia` %in% c("La Pampa", "Río Negro", "Santa Cruz", "Chubut", "Neuquén") ~ "Patagonia", 
+                                                  `Provincia de residencia` %in% c("Santa Fe", "Córdoba", "Entre Ríos", "Buenos Aires") ~"Centro",
+                                                  `Provincia de residencia` %in% c("San Luis", "Mendoza") ~"Cuyo",
+               T ~ `Provincia de residencia`
+               ))
+
+```
+
 
 
 ## Calculo mínimos y máximos de edad de gastros y las medidas de distribución central y CI
@@ -116,7 +137,8 @@ piramide <- ggplot(dfpiramide2, aes(x = Edad, y = Especialistas, fill = Genero))
                  coord_flip() + 
                scale_y_continuous(breaks = seq(-40, 40, by = 5), 
                      labels = c(rev(seq(0, 40, by = 5)), seq(5, 40, by = 5))) + 
-  scale_fill_manual(values = c("cornflowerblue", "#E76BF3")) 
+  scale_fill_manual(values = c("cornflowerblue", "#E76BF3")) +
+        labs(title = "Distribución de profesionales según edad y género")
 
 piramide
 
@@ -131,8 +153,9 @@ Veo que falta tidy.
 head(encuesta)
 
 distribucion_residencia <- encuesta%>%
+                        na.omit(`Provincia de residencia`) %>%
                         group_by(Genero)%>%
-                        count(`Provincia de residencia`, `Ciudad donde ejerce`, name = "Especialistas") %>%
+                        count(`Provincia de residencia`, `Ciudad donde ejerce`, `Región de residencia`, name = "Especialistas") %>%
                         ungroup()
 
 
@@ -140,7 +163,7 @@ grafico_residencia <- ggplot(distribucion_residencia, aes(x = `Provincia de resi
                                      geom_bar(stat = "identity", position = "dodge", na.rm = T) +
                                 coord_flip() + 
                    scale_y_continuous(breaks = seq(0, 90, by = 10)) +
-                   labs(title = "Provincia de residencia") +
+                   labs(title = "Especialistas según provincia de residencia", subtitle = "Distribución según género") +
                            scale_fill_manual(values = c("cornflowerblue", "#E76BF3"))
 
 grafico_residencia
@@ -154,9 +177,9 @@ ciudad_buenos_aires <- distribucion_residencia %>%
 grafico_ciudad_buenos_aires <- ggplot(ciudad_buenos_aires,
                           aes(x = `Ciudad donde ejerce`, y = Especialistas, fill = `Ciudad donde ejerce`)) +
                         geom_bar(position = "dodge", stat = "identity") +
+        labs(title = "Ciudad de ejercicio de la profesión", subtitle = "Residencia Provincia de Buenos Aires") +
                               theme_bw() +
         coord_flip()
-        labs(title = "Ciudad de ejercicio de la profesión") 
         
                           
 resto_del_pais <- distribucion_residencia %>%
@@ -167,9 +190,11 @@ grafico_resto_del_pais<- ggplot(resto_del_pais,
                           aes(x = `Provincia de residencia`, y = Especialistas, fill = `Ciudad donde ejerce`)) +
                         geom_bar(position = "dodge", stat = "identity") +
                               theme_bw() +
-                        coord_flip()
-                         labs(title = "Ciudad de ejercicio de la profesión") +
-                facet_grid(~`Provincia de residencia`)
+                        coord_flip() 
+
+
+                         labs(title = "Ciudad de ejercicio de la profesión", subtitle = "Residencia resto del país") +
+                facet_wrap(~`Provincia de residencia`)
 
                          
                          
@@ -180,6 +205,19 @@ grafico_resto_del_pais
 grafico_ciudad_buenos_aires
 ```
 
+
+```{r}
+
+grafico_regiones<- ggplot(distribucion_residencia,
+                          aes(x = `Provincia de residencia`, y = Especialistas, fill = `Provincia de residencia`)) +
+                        geom_bar(position = "dodge", stat = "identity") +
+                              theme_bw() +
+        coord_flip() +
+                     facet_wrap(~`Región de residencia`, scales="free", ncol = 2) +
+        labs(title = "Especialistas según región de residencia")
+
+grafico_regiones
+```
 
 
 
