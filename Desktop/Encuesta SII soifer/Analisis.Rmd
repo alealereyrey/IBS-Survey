@@ -75,6 +75,7 @@ encuesta <- encuesta %>%
                                                         str_detect(`Ciudad donde ejerce`, regex("tucuman|SMT", ignore_case = T)) ~ "SM Tucuman",
                                                         str_detect(`Ciudad donde ejerce`, regex("C.A.B.A.|CABA|Buenos|bs as|capital federal|capital$|Morón|Pilar|Lujan|La plata|Varela|Mejía|Quilmes|Palomar|Isidro|Vicente|cas$|Zamora|Campana|argentina", ignore_case = T)) & `Provincia de residencia` == "Buenos Aires"  ~ "AMBA",
                                                    T ~ `Ciudad donde ejerce`))
+                       
 
 ```
 
@@ -318,18 +319,145 @@ ggplot(diagnostico_dolor, aes(x=`Criterio diagnóstico SII`, y = Proporcion, fil
 
 
 ## analizo fisiopatología y tto de variante diarrea
+Para esto acorto el valor medicamentos y limpio las observaciones de los tratamientos (tienen por error 2 opciones en algunas observaciones)
+
+grafico la fisiopatologia
 
 ```{r}
 
 diarrea <- encuesta[,c(14,20:32)]
 
-factor()
+diarrea <- diarrea %>%
+        mutate(`Fisiopatología más frecuente variante diarrea` = case_when(str_detect(`Fisiopatología más frecuente variante diarrea`,regex("medicamentos")) ~ "Medicamentos",
+                                                                           str_detect(`Fisiopatología más frecuente variante diarrea`,regex("Disbiosis")) ~ "Disbiosis/sobrecrecimiento", T ~`Fisiopatología más frecuente variante diarrea`))
+        
+        
+diarrea <- diarrea %>%
+        separate(., col = 2, into = "Bismuto", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 3, into = "Rifaximina", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 4, into = "Otros antibióticos", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 5, into = "Probióticos", sep = ";", extra = "drop", fill = "right") %>%
+        separate(., col = 6, into = "Trimebutina", sep = ";", extra = "drop", fill = "right") %>%
+        separate(., col = 7, into = "Trimebutina/simeticona", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 8, into = "Alverina/simeticona", sep = ";", extra = "drop", fill = "right") %>%
+        separate(., col = 9, into = "Pinaverio", sep = ";", extra = "drop", fill = "right") %>%
+        separate(., col = 10, into = "Otilonio", sep = ";", extra = "drop", fill = "right") %>%
+        separate(., col = 11, into = "Colestiramina", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 12, into = "Amitriptilina", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 13, into = "Antiespasmódicos", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 14, into = "Dieta", sep = ";", extra = "drop", fill = "right")
 
-str(diarrea)
+fisiopato <- diarrea %>%
+         group_by(`Fisiopatología más frecuente variante diarrea`) %>%
+                        summarise(n = n()) %>%
+                        mutate(Proporcion = round((n/sum(n))*100,1)) %>%
+                        ungroup()
+fisiopato
 
+grafico_fisiopato <- ggplot(fisiopato, aes(x= `Fisiopatología más frecuente variante diarrea`, y = Proporcion, fill = Proporcion)) +
+                        geom_col(na.rm = T, show.legend = FALSE) + 
+                        scale_x_discrete(na.translate = FALSE) +
+                        theme_bw() +
+                        coord_flip() +
+        labs(title = "Fisiopatología más frecuente de la variante diarrea", x = "Fisiopatología", y = "Porcentaje de respuestas")
 
-
-grafico_diarrea <- ggplot(diarrea,
-                          aes(x= `Fisiopatología más frecuente variante diarrea`))
+grafico_fisiopato
+                        
 ```
+
+## grafico los tratamientos en funcion de la fisiopatologia: bimuto
+
+```{r}
+
+bismuto <- diarrea %>%
+        select(c(`Fisiopatología más frecuente variante diarrea`, Bismuto)) %>%
+        group_by(`Fisiopatología más frecuente variante diarrea`, Bismuto) %>%
+        summarise(n = n()) %>%
+        mutate(Proporcion = round((n/sum(n))*100,1)) %>%
+        ungroup()
+
+ks.test(bismuto$)
+chisq.test(bismuto$`Fisiopatología más frecuente variante diarrea`, bismuto$Bismuto)
+
+
+grafico_bismuto <- ggplot(bismuto,
+                          aes( x = `Fisiopatología más frecuente variante diarrea`, y = Proporcion, fill= Bismuto))+
+                        geom_col(stat = "identity", position = "dodge") +
+                        theme_bw() +
+                        coord_flip() +
+                        scale_x_discrete(na.translate = FALSE) +
+        labs(title = "Efectividad del bismuto según la fisiopatología de la diarrea", x = "Fisiopatología de la diarrea", y = "Porcentaje de respuestas")
+
+grafico_bismuto
+```
+
+## Rifaximina
+
+```{r}
+
+rifaximina <- diarrea %>%
+        select(c(`Fisiopatología más frecuente variante diarrea`, Rifaximina)) %>%
+        group_by(`Fisiopatología más frecuente variante diarrea`, Rifaximina) %>%
+        summarise(n = n()) %>%
+        mutate(Proporcion = round((n/sum(n))*100,1)) %>%
+        ungroup()
+
+grafico_rifaximina <- ggplot(rifaximina,
+                          aes( x = `Fisiopatología más frecuente variante diarrea`, y = Proporcion, fill= Rifaximina))+
+                        geom_col(stat = "identity", position = "dodge") +
+                        theme_bw() +
+                        coord_flip() +
+                        scale_x_discrete(na.translate = FALSE) +
+        labs(title = "Efectividad de la rifaximina según la fisiopatología de la diarrea", x = "Fisiopatología de la diarrea", y = "Porcentaje de respuestas")
+
+grafico_rifaximina
+
+```
+
+## Otros medicamentos
+
+```{r}
+otros_tratamientos <- diarrea %>%
+        group_by(`Fisiopatología más frecuente variante diarrea`) %>%
+        summarise(n = n()) %>%
+        mutate(Proporcion = round((n/sum(n))*100,1)) %>%
+        ungroup()
+
+head(otros_tratamientos)
+```
+
+
+
+```{r}
+
+postinfeccion <- diarrea %>%
+        filter(`Fisiopatología más frecuente variante diarrea` == "Post infección")
+
+medicamentos <- diarrea %>%
+        filter(`Fisiopatología más frecuente variante diarrea` == "Medicamentos")
+
+
+sales_biliares <- diarrea %>%
+        filter(`Fisiopatología más frecuente variante diarrea` ==  "Malabsorción de sales biliares")
+
+
+disbiosis <- diarrea %>%
+        filter(`Fisiopatología más frecuente variante diarrea` ==  "Disbiosis / Sobrecrecimiento bacteriano")
+
+
+dieta <- diarrea %>%
+        filter(`Fisiopatología más frecuente variante diarrea` == "Dieta" )
+
+
+```
+
+## grafico cada fisiopatologia
+
+```{r}
+
+grafico_estres <- ggplot(estres, 
+                         aes(x = c()))
+
+```
+
 
