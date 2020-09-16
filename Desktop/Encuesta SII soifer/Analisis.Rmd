@@ -219,17 +219,117 @@ grafico_regiones<- ggplot(distribucion_residencia,
 grafico_regiones
 ```
 
+## Grafico orientacion
+
+```{r}
+
+library(qdapTools)
+
+tabla_orientacion <- mtabulate(strsplit(encuesta$`Orientación prioritaria`, ";")) %>%
+                         summarise_all(.funs = sum,na.rm=T) %>%
+                        pivot_longer(cols = 1:6, names_to = "Orientación", values_to = "Médicos")
+
+encuesta <- cbind(encuesta, mtabulate(strsplit(encuesta$`Orientación prioritaria`, ";")))
+```
 
 
 
+```{r}
+grafico_orientacion <- ggplot(tabla_orientacion,
+                             aes (x= `Orientación`, y = `Médicos`, fill = `Orientación`)) +
+                         geom_col() + 
+                scale_fill_brewer(palette = "Accent")+ 
+        coord_flip () +
+        expand_limits(y = c(0,280)) +
+        labs (title = "Orientación prioritaria en la especialidad") +
+        geom_text(position = position_dodge2(width = 1), aes (label = `Médicos`), vjust = 0.5, hjust = -0.5)
+        
+                        
+
+grafico_orientacion
+```
 
 
 
+## Grafico lugar de trabajo
+
+
+```{r}
+unique(encuesta$`Lugar de Trabajo`)
+
+tabla_trabajo <- mtabulate(strsplit(encuesta$`Lugar de Trabajo`, " y ")) %>%
+                         summarise_all(.funs = sum,na.rm=T) 
+
+tabla_trabajo$`Centro medico` <- tabla_trabajo$`Céntro médico` + tabla_trabajo$`centro médico privado` + tabla_trabajo$`Centro médico privado`
+
+tabla_trabajo$`Consultorio privado` <- tabla_trabajo$`Consultorio privado` + tabla_trabajo$`consultorio médico privado` + tabla_trabajo$`consultorio privado`
+
+tabla_trabajo <- subset(tabla_trabajo, select = c(`Consultorio privado`, `Centro medico`, `Hospital`)) %>%
+                        pivot_longer(cols = 1:3, names_to = "Centro", values_to = "Médicos")
+
+
+grafico_orientacion <- ggplot(tabla_trabajo,
+                             aes (x= `Centro`, y = `Médicos`, fill = `Centro`)) +
+                         geom_col() + 
+                scale_fill_brewer(palette = "Pastel1")+ 
+        expand_limits(y = c(0, 230)) +
+                 labs (title = "Tipo de centro de salud") +
+        geom_text(position = position_dodge2(width = 1), aes (label = `Médicos`), vjust = -0.5)
+        
+                        
+
+grafico_orientacion
+```
+
+
+## Asociación entre criterio diagnóstico y dolor
+
+```{r}
+chisq.test(encuesta$`Criterio diagnóstico SII`, encuesta$`¿Existe SII sin dolor?`)
+
+diagnostico_dolor <- encuesta %>%
+                        group_by(`Criterio diagnóstico SII`, `¿Existe SII sin dolor?`) %>%
+                        summarise(n = n()) %>%
+                        mutate(Proporcion = round((n/sum(n))*100,1)) %>%
+                        ungroup()
+
+                       
+diagnostico_dolor[1:3, 1] <- "Experiencia personal"
+diagnostico_dolor[4:6, 1] <- "Criterios de Roma"
+
+
+str(diagnostico_dolor)
+
+as.factor(c(diagnostico_dolor$`¿Existe SII sin dolor?`, diagnostico_dolor$`Criterio diagnóstico SII`))
+
+
+ggplot(diagnostico_dolor, aes(x=`Criterio diagnóstico SII`, y = Proporcion, fill = `¿Existe SII sin dolor?`)) +
+        geom_col(position = "dodge") +
+       theme_bw()
+
+ggplot(diagnostico_dolor, aes(x=`Criterio diagnóstico SII`, y = Proporcion, fill = `¿Existe SII sin dolor?`)) +
+        geom_col(position = "dodge") +
+        geom_text(position = position_dodge2(width = 1), aes (label = `Proporcion`), vjust = -0.5) +
+       labs(title = "Existencia de SII sin dolor según el criterio utilizado para el diagnóstico", subtitle = "X-squared = 15.617, p-value = 0.0004063", x = "Criterio diagnóstico utilizado", y = "Porcentaje de respuesta") +
+        expand_limits(y = c(0, 60))
+        
+
+```
+
+
+## analizo fisiopatología y tto de variante diarrea
+
+```{r}
+
+diarrea <- encuesta[,c(14,20:32)]
+
+factor()
+
+str(diarrea)
 
 
 
-
-
-
-
+grafico_diarrea <- ggplot(diarrea,
+                          aes(x= `Fisiopatología más frecuente variante diarrea`))
+```
 
