@@ -16,9 +16,11 @@ library(tidyverse)
 library(dplyr)
 library(gapminder)
 library(readxl)
+library(qdapTools)
+
 ```
 
-## Cargo las bases de datos y creo una sola tabla con las columnas de Saavedra. 
+## Cargo las bases de datos y evalúo como estan nombradas las columnas
 
 ```{r}
 encuesta <- read.csv("C:/Users/Ale/Desktop/Encuesta SII soifer/SII en Argentina.csv", fileEncoding = "UTF-8", na.strings="")
@@ -28,19 +30,37 @@ tail(encuesta)
 colnames(encuesta)
 str(encuesta)
 
-names(encuesta)[1:66] <- c(1:66)
 ```
-## Limpio las preguntas
+
+## Renombo las columnas (preguntas)
 
 ```{r}
-names(encuesta) <- c("Fecha", "DNI", "Edad", "Genero","Provincia de residencia", "Ciudad donde ejerce", "Orientación prioritaria","Lugar de Trabajo", "Proporcion de pacientes con SII mensual", "Criterio diagnóstico SII", "¿Existe SII sin dolor?", "Variante más frecuente", "Variantes que puede pasar por alto una patología orgánica", "Fisiopatología más frecuente variante diarrea", "Fisiopatología más frecuente variante constipación", "Variantes con más psico-comorbilidad", "Variantes con menos alternativas terapéuticas", "Loperamida en variante diarrea", "Carbón en variante diarrea", "Bismuto en variante diarrea", "Rifaximina en variante diarrea", "Otros ATB en variante diarrea", "Probióticos en variante diarrea", "Trimebutina en variante diarrea", "Trimebutina/simeticona en variante diarrea", "Alverina/simeticona en variante diarrea", "Pinaverio en variante diarrea", "Otilonio en variante diarrea", "Colestiramina en variante diarrea", "Amitriptilina en variante diarrea", "Antiespasmódicos ansiolíticos en variante diarrea", "Dieta en variante diarrea", "Polietilenglicol en variante estreñimiento", "Psyllium en variante estreñimiento", "Lactulosa en variante estreñimiento", "Linaclotida en variante estreñimiento", "Prucalopride en variante estreñimiento", "Sales biliares en variante estreñimiento", "Trimebutina en variante estreñimiento", "Bisacodilo/picosulfato en variante estreñimiento", "Antibióticos en variante estreñimiento", "Senósidos en variante estreñimiento", "Dieta en variante estreñimiento", "¿Considera primero evitar medicación y emplear dieta y productos naturales?", "Indicación de antidepresivos", "Utiliza terapias alternativas en el SII", "Meta principal endel tratamiento del SII", "Nivel de frustración si el paciente no mejora en las primeras 2-3 consultas", "Cree que el tratamiento es más complejo cuando el género del paciente es:", "¿Le desagrada que el paciente concurra con información de internet y discuta con ud?", "¿Qué perfil/es de personalidad de su paciente le resula más dificil abordar?", "¿Preferiría de ser posible dejar de atender este tipo de pacientes?", "Con respecto a los estudios previos del paciente", "¿Cuánto tiempo le demanda el paciente funcional en relación a otras patologías¿", "En caso que considere que le lleva más tiempo, ¿Eso lo incomoda?", "Considera que estuchar al paciente:", "¿Qué tipo de escucha realiza?", "En caso de considerar que su escucha es insuficiente, esto se debe a:", "¿Cuánto tiempo le dedica a la primera consulta?", "Considera que la educación que se le brinda a los pacientes:", "¿Cuánto del tratamiento considera que depende del paciente?", "¿Cree que los pacientes con SII se preocupan demasiado por su trastorno?", "¿Cree que los pacientes con SII consultan principalmente por miedo a padecer cáncer?", "¿Considera que el componente psicológico en estos pacientes es más importante que el biológico?", "¿Considera que estos pacientes deben ser derivados a una terapia psicológica?", "Trabaja ud. en equipo con:", "¿Cuál es su vía de comunicación preferente con su paciente?", "¿Pregunta sobre la posibilidad de abusos como disparadores de la sintomatología?", "Si la respuesta es afirmativa, ¿Lo interroga en la primera consulta?", "¿Pregunta de la misma manera sobre abuso si el paciente es hombre o mujer?", "¿Cuán satisfecho se encuentra con su práctica clínica en el paciente con SII?", "¿Qué otras condiciones siente que necesitaría para optimizarla?")
+
+names(encuesta) <- c("Fecha", "DNI", "Edad", "Genero","Provincia de residencia", "Ciudad donde ejerce", "Orientación prioritaria","Lugar de Trabajo", "Proporcion de pacientes con SII mensual", "Criterio diagnóstico SII", "¿Existe SII sin dolor?", "Variante más frecuente", "Variantes que puede pasar por alto una patología orgánica", "Fisiopatología más frecuente variante diarrea", "Fisiopatología más frecuente variante constipación", "Variantes con más psico-comorbilidad", "Variantes con menos alternativas terapéuticas", "Loperamida en diarrea", "Carbón en diarrea", "Bismuto en diarrea", "Rifaximina en diarrea", "Otros ATB en diarrea", "Probióticos en diarrea", "Trimebutina en diarrea", "Trimebutina/simeticona en diarrea", "Alverina/simeticona en diarrea", "Pinaverio en diarrea", "Otilonio en diarrea", "Colestiramina en diarrea", "Amitriptilina en diarrea", "Antiespasmódicos ansiolíticos en diarrea", "Dieta en diarrea", "Polietilenglicol en estreñimiento", "Psyllium en estreñimiento", "Lactulosa en estreñimiento", "Linaclotida en estreñimiento", "Prucalopride en estreñimiento", "Sales biliares en estreñimiento", "Trimebutina en estreñimiento", "Bisacodilo/picosulfato en estreñimiento", "Antibióticos en estreñimiento", "Senósidos en estreñimiento", "Dieta en estreñimiento", "¿Considera primero evitar medicación y emplear dieta y productos naturales?", "Indicación de antidepresivos", "Utiliza terapias alternativas en el SII", "Meta principal endel tratamiento del SII", "Nivel de frustración si el paciente no mejora en las primeras 2-3 consultas", "Cree que el tratamiento es más complejo cuando el género del paciente es:", "¿Le desagrada que el paciente concurra con información de internet y discuta con ud?", "¿Qué perfil/es de personalidad de su paciente le resula más dificil abordar?", "¿Preferiría de ser posible dejar de atender este tipo de pacientes?", "Con respecto a los estudios previos del paciente", "¿Cuánto tiempo le demanda el paciente funcional en relación a otras patologías¿", "En caso que considere que le lleva más tiempo, ¿Eso lo incomoda?", "Considera que estuchar al paciente:", "¿Qué tipo de escucha realiza?", "En caso de considerar que su escucha es insuficiente, esto se debe a:", "¿Cuánto tiempo le dedica a la primera consulta?", "Considera que la educación que se le brinda a los pacientes:", "¿Cuánto del tratamiento considera que depende del paciente?", "¿Cree que los pacientes con SII se preocupan demasiado por su trastorno?", "¿Cree que los pacientes con SII consultan principalmente por miedo a padecer cáncer?", "¿Considera que el componente psicológico en estos pacientes es más importante que el biológico?", "¿Considera que estos pacientes deben ser derivados a una terapia psicológica?", "Trabaja ud. en equipo con:", "¿Cuál es su vía de comunicación preferente con su paciente?", "¿Pregunta sobre la posibilidad de abusos como disparadores de la sintomatología?", "Si la respuesta es afirmativa, ¿Lo interroga en la primera consulta?", "¿Pregunta de la misma manera sobre abuso si el paciente es hombre o mujer?", "¿Cuán satisfecho se encuentra con su práctica clínica en el paciente con SII?", "¿Qué otras condiciones siente que necesitaría para optimizarla?")
 
 
 ```
+
+##Exploración de missing values
+
+```{r}
+# Definir una funcion que cuente los NaNs y aplicarla al dataframe
+
+na_count <- sapply(encuesta, function(y) sum(length(which(is.na(y)))))
+
+
+#Creo un dataframe con los valores nulos
+
+na_count <- data.frame(na_count)
+na_count
+
+```
+
 
 ## Limpieza
 
 Una de las observaciones que dice hombre;mujer, la renombro hombre. 
+Limpio iterando sobre unique
 
 ```{r}
 encuesta$Genero[181] <- "Hombre"
@@ -74,8 +94,36 @@ encuesta <- encuesta %>%
                                                         str_detect(`Ciudad donde ejerce`, regex("Paran(a|á)", ignore_case = T)) ~ "Paraná",
                                                         str_detect(`Ciudad donde ejerce`, regex("tucuman|SMT", ignore_case = T)) ~ "SM Tucuman",
                                                         str_detect(`Ciudad donde ejerce`, regex("C.A.B.A.|CABA|Buenos|bs as|capital federal|capital$|Morón|Pilar|Lujan|La plata|Varela|Mejía|Quilmes|Palomar|Isidro|Vicente|cas$|Zamora|Campana|argentina", ignore_case = T)) & `Provincia de residencia` == "Buenos Aires"  ~ "AMBA",
-                                                   T ~ `Ciudad donde ejerce`))
-                       
+                                                   T ~ `Ciudad donde ejerce`),
+                       `Fisiopatología más frecuente variante diarrea` = case_when(str_detect(`Fisiopatología más frecuente variante diarrea`,regex("medicamentos")) ~ "Medicamentos",
+                                                                           str_detect(`Fisiopatología más frecuente variante diarrea`,regex("Disbiosis")) ~ "Disbiosis/sobrecrecimiento", T ~`Fisiopatología más frecuente variante diarrea`)) %>%
+        separate(., col = 18, into = "Loperamida en diarrea", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 19, into = "Carbón en diarrea", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 20, into = "Bismuto en diarrea", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 21, into = "Rifaximina en diarrea", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 22, into = "Otros antibióticos en diarrea", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 23, into = "Probióticos en diarrea", sep = ";", extra = "drop", fill = "right") %>%
+        separate(., col = 24, into = "Trimebutina en diarrea", sep = ";", extra = "drop", fill = "right") %>%
+        separate(., col = 25, into = "Trimebutina/simeticona en diarrea", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 26, into = "Alverina/simeticona en diarrea", sep = ";", extra = "drop", fill = "right") %>%
+        separate(., col = 27, into = "Pinaverio en diarrea", sep = ";", extra = "drop", fill = "right") %>%
+        separate(., col = 28, into = "Otilonio en diarrea", sep = ";", extra = "drop", fill = "right") %>%
+        separate(., col = 29, into = "Colestiramina en diarrea", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 30, into = "Amitriptilina en diarrea", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 31, into = "Antiespasmódicos en diarrea", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 32, into = "Dieta en diarrea", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 33, into = "Polietilenglicol en estreñimiento", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 34, into = "Psyllium en estreñimiento", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 35, into = "Lactulosa en estreñimiento", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 36, into = "Linaclotida en estreñimiento", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 37, into = "Prucalopride en estreñimiento", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 38, into = "Sales biliares en estreñimiento", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 39, into = "Trimebutina en estreñimiento", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 40, into = "Bisacodilo/picosulfato en estreñimiento", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 41, into = "Antibióticos en estreñimiento", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 42, into = "Senósidos en estreñimiento", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 43, into = "Dieta en estreñimiento", sep = ";", extra = "drop", fill = "right")
+
 
 ```
 
@@ -122,7 +170,7 @@ Luego paso el numero de especialistas a double para poder multiplicar los hombre
 ```{r}
 
 dfpiramide <- encuesta %>%
-                mutate(Edad = cut(Edad, 11, labels=c("26-30","31-35","36-40","41-45","46-50","51-55","56-60","61-65","66-70","71-75","76+"))) %>%
+                mutate(Edad_ordinal = cut(Edad, 11, labels=c("26-30","31-35","36-40","41-45","46-50","51-55","56-60","61-65","66-70","71-75","76+"))) %>%
         group_by(Edad) %>%
         count(Genero, name = "Especialistas")%>%
         ungroup
@@ -250,8 +298,6 @@ grafico_orientacion <- ggplot(tabla_orientacion,
 grafico_orientacion
 ```
 
-
-
 ## Grafico lugar de trabajo
 
 
@@ -318,6 +364,10 @@ ggplot(diagnostico_dolor, aes(x=`Criterio diagnóstico SII`, y = Proporcion, fil
 ```
 
 
+
+
+
+
 ## analizo fisiopatología y tto de variante diarrea
 Para esto acorto el valor medicamentos y limpio las observaciones de los tratamientos (tienen por error 2 opciones en algunas observaciones)
 
@@ -325,27 +375,25 @@ grafico la fisiopatologia
 
 ```{r}
 
-diarrea <- encuesta[,c(14,20:32)]
-
-diarrea <- diarrea %>%
-        mutate(`Fisiopatología más frecuente variante diarrea` = case_when(str_detect(`Fisiopatología más frecuente variante diarrea`,regex("medicamentos")) ~ "Medicamentos",
-                                                                           str_detect(`Fisiopatología más frecuente variante diarrea`,regex("Disbiosis")) ~ "Disbiosis/sobrecrecimiento", T ~`Fisiopatología más frecuente variante diarrea`))
+diarrea <- encuesta[,c(14,18:32, 74:79)]
         
         
 diarrea <- diarrea %>%
-        separate(., col = 2, into = "Bismuto", sep = ";", extra = "drop", fill = "right")%>%
-        separate(., col = 3, into = "Rifaximina", sep = ";", extra = "drop", fill = "right")%>%
-        separate(., col = 4, into = "Otros antibióticos", sep = ";", extra = "drop", fill = "right")%>%
-        separate(., col = 5, into = "Probióticos", sep = ";", extra = "drop", fill = "right") %>%
-        separate(., col = 6, into = "Trimebutina", sep = ";", extra = "drop", fill = "right") %>%
-        separate(., col = 7, into = "Trimebutina/simeticona", sep = ";", extra = "drop", fill = "right")%>%
-        separate(., col = 8, into = "Alverina/simeticona", sep = ";", extra = "drop", fill = "right") %>%
-        separate(., col = 9, into = "Pinaverio", sep = ";", extra = "drop", fill = "right") %>%
-        separate(., col = 10, into = "Otilonio", sep = ";", extra = "drop", fill = "right") %>%
-        separate(., col = 11, into = "Colestiramina", sep = ";", extra = "drop", fill = "right")%>%
-        separate(., col = 12, into = "Amitriptilina", sep = ";", extra = "drop", fill = "right")%>%
-        separate(., col = 13, into = "Antiespasmódicos", sep = ";", extra = "drop", fill = "right")%>%
-        separate(., col = 14, into = "Dieta", sep = ";", extra = "drop", fill = "right")
+        separate(., col = 2, into = "Loperamida", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 3, into = "Carbón", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 4, into = "Bismuto", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 5, into = "Rifaximina", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 6, into = "Otros antibióticos", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 7, into = "Probióticos", sep = ";", extra = "drop", fill = "right") %>%
+        separate(., col = 8, into = "Trimebutina", sep = ";", extra = "drop", fill = "right") %>%
+        separate(., col = 9, into = "Trimebutina/simeticona", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 10, into = "Alverina/simeticona", sep = ";", extra = "drop", fill = "right") %>%
+        separate(., col = 11, into = "Pinaverio", sep = ";", extra = "drop", fill = "right") %>%
+        separate(., col = 12, into = "Otilonio", sep = ";", extra = "drop", fill = "right") %>%
+        separate(., col = 13, into = "Colestiramina", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 14, into = "Amitriptilina", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 15, into = "Antiespasmódicos", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 16, into = "Dieta", sep = ";", extra = "drop", fill = "right")
 
 fisiopato <- diarrea %>%
          group_by(`Fisiopatología más frecuente variante diarrea`) %>%
@@ -365,6 +413,43 @@ grafico_fisiopato
                         
 ```
 
+## Fisiopatologia y especialidad
+
+```{r}
+
+diarrea2 <- encuesta[,c(14,74:79)]
+
+diarrea_especialidad <- fisio_dico %>% 
+                        group_by(`Fisiopatología más frecuente variante diarrea`) %>%
+                        na.omit() %>%
+                        summarise_all(funs(sum)) %>%
+                        mutate("Otras orientaciones" = `Cirugia` + `Hepatología` + `Endoscopia digestiva` + `Gastroenterología clinica` + `Pancreatologia`, .keep = "unused")
+
+
+orientacion_motilidad <- encuesta%>%
+        mutate(`Motilidad` = if_else(str_detect(`Orientación prioritaria`,regex("Motilidad")), 1, 0))
+
+fisio_dico
+
+
+```
+## Grafico de fisiopatologia en funcion de la especialidad
+
+```{r}
+
+ggplot(diarrea_especialidad, 
+       aes(x= `Fisiopatología más frecuente variante diarrea`, y = `Motilidad y Neurogastro`)) +
+        geom_point() +
+  labs(title = 'Correlacion entre fisiopatología y especialidad')+
+  geom_smooth(method = 'glm',
+              method.args = list(family = "binomial"),
+              color = "blue",
+              se = FALSE) +
+        coord_flip()
+```
+
+
+
 ## grafico los tratamientos en funcion de la fisiopatologia: bimuto
 
 ```{r}
@@ -376,7 +461,7 @@ bismuto <- diarrea %>%
         mutate(Proporcion = round((n/sum(n))*100,1)) %>%
         ungroup()
 
-ks.test(bismuto$)
+
 chisq.test(bismuto$`Fisiopatología más frecuente variante diarrea`, bismuto$Bismuto)
 
 
@@ -451,12 +536,21 @@ dieta <- diarrea %>%
 
 ```
 
-## grafico cada fisiopatologia
+## Dicotomizo las variables categoricas para el analisis
 
 ```{r}
 
-grafico_estres <- ggplot(estres, 
-                         aes(x = c()))
+encuesta_dico <- encuesta %>%
+                mutate(Edad_ordinal = cut(Edad, 11, labels=c("26-30","31-35","36-40","41-45","46-50","51-55","56-60","61-65","66-70","71-75","76+")),
+                       Genero_dico = recode(Genero, "Hombre" = 1, "Mujer" = 0))%>%
+       cbind(mtabulate(strsplit(encuesta$`Orientación prioritaria`, ";")), mtabulate(strsplit(encuesta$`Lugar de Trabajo`, "y")))
+
+
+cols <- c("Loperamida en diarrea", "Carbón en diarrea",  "Bismuto en diarrea", "Rifaximina en diarrea", "Otros antibióticos en diarrea",    "Probióticos en diarrea", "Trimebutina en diarrea", "Trimebutina/simeticona en diarrea", "Alverina/simeticona en diarrea", "Pinaverio en diarrea", "Otilonio en diarrea", "Colestiramina en diarrea", "Amitriptilina en diarrea", "Antiespasmódicos en diarrea", "Dieta en diarrea","Polietilenglicol en estreñimiento","Psyllium en estreñimiento", "Lactulosa en estreñimiento", "Linaclotida en estreñimiento", "Prucalopride en estreñimiento", "Sales biliares en estreñimiento" , "Trimebutina en estreñimiento", "Bisacodilo/picosulfato en estreñimiento", "Antibióticos en estreñimiento", "Senósidos en estreñimiento", "Dieta en estreñimiento" )
+        
+encuesta_dico[cols] <- lapply(encuesta_dico[cols], factor, levels = c("No efectiva", "No se","Algo efectiva", "Muy efectiva"), ordered = T)
+
+str(encuesta_dico)
 
 ```
 
