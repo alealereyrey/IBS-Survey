@@ -31,7 +31,7 @@ encuesta <- read.csv("C:/Users/Ale/Desktop/Encuesta SII soifer/SII en Argentina.
 
 ```{r}
 
-names(encuesta) <- c("Fecha", "DNI", "Edad", "Genero","Provincia de residencia", "Ciudad donde ejerce", "Orientación prioritaria","Lugar de Trabajo", "Proporcion de pacientes con SII mensual", "Criterio diagnóstico SII", "¿Existe SII sin dolor?", "Variante más frecuente", "Variantes que puede pasar por alto una patología orgánica", "Fisiopatología más frecuente variante diarrea", "Fisiopatología más frecuente variante constipación", "Variantes con más psico-comorbilidad", "Variantes con menos alternativas terapéuticas", "Loperamida en diarrea", "Carbón en diarrea", "Bismuto en diarrea", "Rifaximina en diarrea", "Otros ATB en diarrea", "Probióticos en diarrea", "Trimebutina en diarrea", "Trimebutina/simeticona en diarrea", "Alverina/simeticona en diarrea", "Pinaverio en diarrea", "Otilonio en diarrea", "Colestiramina en diarrea", "Amitriptilina en diarrea", "Antiespasmódicos ansiolíticos en diarrea", "Dieta en diarrea", "Polietilenglicol en estreñimiento", "Psyllium en estreñimiento", "Lactulosa en estreñimiento", "Linaclotida en estreñimiento", "Prucalopride en estreñimiento", "Sales biliares en estreñimiento", "Trimebutina en estreñimiento", "Bisacodilo/picosulfato en estreñimiento", "Antibióticos en estreñimiento", "Senósidos en estreñimiento", "Dieta en estreñimiento", "¿Considera primero evitar medicación y emplear dieta y productos naturales?", "Indicación de antidepresivos", "Utiliza terapias alternativas en el SII", "Meta principal endel tratamiento del SII", "Nivel de frustración", "Tratamiento más complejo en género", "¿Le desagrada que el paciente concurra con información de internet y discuta con ud?", "¿Qué perfil/es de personalidad de su paciente le resula más dificil abordar?", "¿Preferiría de ser posible dejar de atender este tipo de pacientes?", "Con respecto a los estudios previos del paciente", "¿Cuánto tiempo le demanda el paciente funcional en relación a otras patologías¿", "En caso que considere que le lleva más tiempo, ¿Eso lo incomoda?", "Considera que estuchar al paciente:", "¿Qué tipo de escucha realiza?", "En caso de considerar que su escucha es insuficiente, esto se debe a:", "¿Cuánto tiempo le dedica a la primera consulta?", "Considera que la educación que se le brinda a los pacientes:", "¿Cuánto del tratamiento considera que depende del paciente?", "¿Cree que los pacientes con SII se preocupan demasiado por su trastorno?", "¿Cree que los pacientes con SII consultan principalmente por miedo a padecer cáncer?", "¿Considera que el componente psicológico en estos pacientes es más importante que el biológico?", "¿Considera que estos pacientes deben ser derivados a una terapia psicológica?", "Trabaja ud. en equipo con:", "¿Cuál es su vía de comunicación preferente con su paciente?", "¿Pregunta sobre la posibilidad de abusos como disparadores de la sintomatología?", "Si la respuesta es afirmativa, ¿Lo interroga en la primera consulta?", "¿Pregunta de la misma manera sobre abuso si el paciente es hombre o mujer?", "¿Cuán satisfecho se encuentra con su práctica clínica en el paciente con SII?", "¿Qué otras condiciones siente que necesitaría para optimizarla?")
+names(encuesta) <- c("Fecha", "DNI", "Edad", "Genero","Provincia de residencia", "Ciudad donde ejerce", "Orientación prioritaria","Lugar de Trabajo", "SII mensual", "Criterio diagnóstico SII", "¿Existe SII sin dolor?", "Variante más frecuente", "Variantes que puede pasar por alto una patología orgánica", "Fisiopatología más frecuente variante diarrea", "Fisiopatología más frecuente variante constipación", "Variantes con más psico-comorbilidad", "Variantes con menos alternativas terapéuticas", "Loperamida en diarrea", "Carbón en diarrea", "Bismuto en diarrea", "Rifaximina en diarrea", "Otros ATB en diarrea", "Probióticos en diarrea", "Trimebutina en diarrea", "Trimebutina/simeticona en diarrea", "Alverina/simeticona en diarrea", "Pinaverio en diarrea", "Otilonio en diarrea", "Colestiramina en diarrea", "Amitriptilina en diarrea", "Antiespasmódicos ansiolíticos en diarrea", "Dieta en diarrea", "Polietilenglicol en estreñimiento", "Psyllium en estreñimiento", "Lactulosa en estreñimiento", "Linaclotida en estreñimiento", "Prucalopride en estreñimiento", "Sales biliares en estreñimiento", "Trimebutina en estreñimiento", "Bisacodilo/picosulfato en estreñimiento", "Antibióticos en estreñimiento", "Senósidos en estreñimiento", "Dieta en estreñimiento", "¿Considera primero evitar medicación y emplear dieta y productos naturales?", "Indicación de antidepresivos", "Utiliza terapias alternativas en el SII", "Meta principal endel tratamiento del SII", "Nivel de frustración", "Tratamiento más complejo en género", "¿Le desagrada que el paciente concurra con información de internet y discuta con ud?", "¿Qué perfil/es de personalidad de su paciente le resula más dificil abordar?", "¿Preferiría de ser posible dejar de atender este tipo de pacientes?", "Con respecto a los estudios previos del paciente", "¿Cuánto tiempo le demanda el paciente funcional en relación a otras patologías¿", "En caso que considere que le lleva más tiempo, ¿Eso lo incomoda?", "Considera que estuchar al paciente:", "¿Qué tipo de escucha realiza?", "En caso de considerar que su escucha es insuficiente, esto se debe a:", "¿Cuánto tiempo le dedica a la primera consulta?", "Considera que la educación que se le brinda a los pacientes:", "¿Cuánto del tratamiento considera que depende del paciente?", "¿Cree que los pacientes con SII se preocupan demasiado por su trastorno?", "¿Cree que los pacientes con SII consultan principalmente por miedo a padecer cáncer?", "¿Considera que el componente psicológico en estos pacientes es más importante que el biológico?", "¿Considera que estos pacientes deben ser derivados a una terapia psicológica?", "Trabaja ud. en equipo con:", "¿Cuál es su vía de comunicación preferente con su paciente?", "¿Pregunta sobre la posibilidad de abusos como disparadores de la sintomatología?", "Si la respuesta es afirmativa, ¿Lo interroga en la primera consulta?", "¿Pregunta de la misma manera sobre abuso si el paciente es hombre o mujer?", "¿Cuán satisfecho se encuentra con su práctica clínica en el paciente con SII?", "¿Qué otras condiciones siente que necesitaría para optimizarla?")
 
 
 ```
@@ -133,6 +133,18 @@ encuesta <- encuesta %>%
         separate(., col = 43, into = "Dieta en estreñimiento", sep = ";", extra = "drop", fill = "right")
 
 
+encuesta_trabajo <- encuesta %>%
+  strsplit(encuesta$`Lugar de Trabajo`, " y ")
+```
+
+## Factorizo la efectividad de los tratamientos
+
+```{r}
+cols <- c("Loperamida en diarrea", "Carbón en diarrea",  "Bismuto en diarrea", "Rifaximina en diarrea", "Otros antibióticos en diarrea",    "Probióticos en diarrea", "Trimebutina en diarrea", "Trimebutina/simeticona en diarrea", "Alverina/simeticona en diarrea", "Pinaverio en diarrea", "Otilonio en diarrea", "Colestiramina en diarrea", "Amitriptilina en diarrea", "Antiespasmódicos en diarrea", "Dieta en diarrea","Polietilenglicol en estreñimiento","Psyllium en estreñimiento", "Lactulosa en estreñimiento", "Linaclotida en estreñimiento", "Prucalopride en estreñimiento", "Sales biliares en estreñimiento" , "Trimebutina en estreñimiento", "Bisacodilo/picosulfato en estreñimiento", "Antibióticos en estreñimiento", "Senósidos en estreñimiento", "Dieta en estreñimiento" )
+
+encuesta[cols] <- lapply(encuesta[cols], tolower)
+encuesta[cols] <- lapply(encuesta[cols], factor, levels = c("muy efectiva", "algo efectiva", "no efectiva", "no se"), ordered = T)
+                      
 ```
 
 
@@ -380,7 +392,7 @@ fisiopato_diarrea <- diarrea %>%
                         summarise(n = n()) %>%
                         mutate(Proporcion = round((n/sum(n))*100,1)) %>%
                         ungroup()
-grafico_fisiopato_diarrea <- ggplot(fisiopato, aes(x= `Fisiopatología más frecuente variante diarrea`, y = Proporcion, fill = Proporcion)) +
+grafico_fisiopato_diarrea <- ggplot(fisiopato_diarrea, aes(x= `Fisiopatología más frecuente variante diarrea`, y = Proporcion, fill = Proporcion)) +
                         geom_col(na.rm = T, show.legend = FALSE) + 
                         scale_x_discrete(na.translate = FALSE) +
                         theme_bw() +
@@ -411,17 +423,45 @@ grafico_fisiopato_constipacion
 
 ```{r}
 
-proporcion <-"Proporcion de pacientes con SII mensual"
+proporcion <-"SII mensual"
 
 encuesta[proporcion] <- lapply(encuesta[proporcion], factor, levels = c("0 a 25%", "25 a 50%", "> de 50%"), ordered = T)
 
-proporcion_sii <- encuesta %>%
-        group_by(Edad_ordinal,`Proporcion de pacientes con SII mensual`)%>%
+proporcion_sii_edad <- encuesta %>%
+        group_by(Edad_ordinal,`SII mensual`)%>%
         summarise(n = n()) %>%
         mutate(Proporcion = round((n/sum(n))*100,1))
 
-ggplot(proporcion_sii, aes(fill = `Proporcion de pacientes con SII mensual`, y = Proporcion,  x = Edad_ordinal)) +
+ggplot(proporcion_sii_edad, aes(fill = `SII mensual`, y = Proporcion,  x = Edad_ordinal)) +
         geom_col(position = "dodge")
+
+proporcion_sii_edad
+```
+
+
+
+
+
+## Resultados de diagnostico
+
+
+
+## Separo en motilistas vs otros
+
+```{r}
+
+encuesta<- encuesta %>%
+       mutate(`Orientación dicotomica` = if_else(str_detect(`Orientación prioritaria`,regex("Motilidad")), "Motilista", "No motilista"))
+
+proporcion_sii_orientacion <- encuesta %>%
+        group_by(Edad_ordinal, `Orientación dicotomica`, `SII mensual`)%>%
+        summarise(n = n()) %>%
+        mutate(Proporcion = round((n/sum(n))*100,1))
+
+ggplot(proporcion_sii_orientacion, aes(fill = `SII mensual`, y = Proporcion,  x = `Orientación dicotomica`)) +
+        geom_col(position = "dodge")  + 
+        facet_wrap(~Edad_ordinal, scales="free", ncol = 2) +
+        labs(title = "Proporción de consultas mensuales por SII", x = "Especialidad", y = "% de profesionales")
 
 
 ```
@@ -439,6 +479,27 @@ ggplot(proporcion_sii, aes(fill = `Proporcion de pacientes con SII mensual`, y =
 
 
 
+## Resultados tratamiento
+
+### Creo un df de efectividad de tratamiento
+
+```{r}
+efectividad_tto_diarrea <- encuesta[,c(18:32)] %>%
+         pivot_longer(cols = everything()) %>%
+  count(name, value) %>%
+  pivot_wider(names_from = value, values_from = n, values_fill = 0) %>%
+        mutate(`% muy efectiva` = round((`muy efectiva`/304)*100,1)) %>%
+        arrange(desc(`% muy efectiva`))
+
+library(kableExtra)
+
+tabla_tto_diarrea <- efectividad_tto_diarrea %>%
+          kbl(caption = "Efectividad considerada para diversos tratamientos del SII-D") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+
+tabla_tto_diarrea
+
+```
 
 
 
@@ -446,6 +507,26 @@ ggplot(proporcion_sii, aes(fill = `Proporcion de pacientes con SII mensual`, y =
 
 
 
+
+
+
+
+## Construyo una tabla 1
+
+```{r}
+
+library(tableone)
+
+listVars <- c("Edad", "Región de residencia", "Orientación dicotomica", "Lugar de Trabajo")
+
+catVars <- c("Región de residencia", "Orientación dicotomica", "Lugar de Trabajo")
+
+table1 <- CreateTableOne(vars = listVars, data = encuesta, factorVars = catVars, strata = c("Genero"))
+
+a <- print(table1, quote = TRUE, noSpaces = TRUE)
+
+as.data.frame(a)
+```
 
 
 
@@ -536,7 +617,6 @@ frustracion_genero <- encuesta %>%
 
 chisq.test(encuesta$Genero, encuesta$`Nivel de frustración`)
 
-chisq.test(frustracion_genero)
 
 ggplot(frustracion_genero, aes(fill = `Nivel de frustración`, y = Proporcion,  x = Genero)) +
         geom_col(position = "dodge") +
@@ -578,6 +658,7 @@ ggplot(frustracion_genero_dico, aes(fill = `Nivel de frustración`, y = Proporci
         labs(title = "Nivel de frustración si el paciente no mejora en 2-3 consultas según edad", subtitle = "X-squared = 0.087772, df = 1, p-value = 0.767", x = "Género", y = "Proporción") +
         scale_y_continuous(labels = function(x) paste0(x, "%"))
 
+cumsum(frustracion_genero_dico$n)
 ```
 
 
