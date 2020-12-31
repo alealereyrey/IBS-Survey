@@ -492,17 +492,51 @@ efectividad_tto_diarrea <- encuesta[,c(18:32)] %>%
   adorn_pct_formatting(digits = 1) %>%
   adorn_ns()
 
+# remuevo "en diarrea"
+efectividad_tto_diarrea$name <- str_remove(efectividad_tto_diarrea$name, " en diarrea")
+
+# remuevo nombre de la primera columna
 colnames(efectividad_tto_diarrea)[1] <- ""
 
 tabla_tto_diarrea <- efectividad_tto_diarrea %>%
           kable(caption = 'Efectividad considerada para diversos tratamientos del SII-D') %>%
-  kable_styling(bootstrap_options = c("striped", "hover"), html_font = "Arial",full_width = F) 
+  kable_styling(bootstrap_options = c("striped", "hover")) %>%
+   kable_classic(full_width = F, html_font = "Arial")
 
  
 tabla_tto_diarrea
 
 ```
 
+## Hago uno similar pero dicotomizado "efectivo" (algo y muy) vs "no efectivo"
+
+```{r}
+
+efectividad_tto_diarrea_dico <- encuesta[,c(18:32)] %>%
+         pivot_longer(cols = everything()) %>%
+  count(name, value) %>%
+  pivot_wider(names_from = value, values_from = n, values_fill = 0) %>%
+        mutate("efectiva" = `algo efectiva` + `muy efectiva`) %>%
+                arrange(desc(`efectiva`)) %>%
+        select(c(`name`,`efectiva`, `no efectiva`)) %>%
+          adorn_percentages("row") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns()
+
+# remuevo "en diarrea"
+efectividad_tto_diarrea_dico$name <- str_remove(efectividad_tto_diarrea_dico$name, " en diarrea")
+
+# remuevo nombre de la primera columna
+colnames(efectividad_tto_diarrea_dico)[1] <- ""
+
+tabla_tto_diarrea_dico <- efectividad_tto_diarrea_dico %>%
+          kable(caption = 'Efectividad considerada para diversos tratamientos del SII-D') %>%
+  kable_styling(bootstrap_options = c("striped", "hover")) %>%
+   kable_classic(full_width = F, html_font = "Arial")
+
+ 
+tabla_tto_diarrea_dico        
+```
 
 
 
@@ -517,15 +551,19 @@ efectividad_tto_constipacion <- encuesta[,c(33:43)] %>%
   count(name, value) %>%
   pivot_wider(names_from = value, values_from = n, values_fill = 0) %>%
                 arrange(desc(`muy efectiva`)) %>%
-  adorn_percentages("row") %>%
+          adorn_percentages("row") %>%
   adorn_pct_formatting(digits = 1) %>%
   adorn_ns()
 
+# remuevo "en estreñimiento"
+efectividad_tto_constipacion$name <- str_remove(efectividad_tto_constipacion$name, " en estreñimiento")
+
+# remuevo nombre de la primera columna
 colnames(efectividad_tto_constipacion)[1] <- ""
 
 tabla_tto_constipacion <- efectividad_tto_constipacion %>%
           kbl(caption = "Efectividad considerada para diversos tratamientos del SII-C") %>%
-  kable_styling(bootstrap_options = c("striped", "hover"), html_font = "Cambria") %>%
+  kable_styling(bootstrap_options = c("striped", "hover")) %>%
    kable_classic(full_width = F, html_font = "Arial")
 
  
@@ -533,6 +571,34 @@ tabla_tto_constipacion
 
 ```
 
+## dicotomizado
+
+```{r}
+efectividad_tto_constipacion_dico <- encuesta[,c(33:43)] %>%
+         pivot_longer(cols = everything()) %>%
+  count(name, value) %>%
+  pivot_wider(names_from = value, values_from = n, values_fill = 0) %>%
+        mutate("efectiva" = `algo efectiva` + `muy efectiva`) %>%
+                arrange(desc(`efectiva`)) %>%
+        select(c(`name`,`efectiva`, `no efectiva`)) %>%
+          adorn_percentages("row") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns()
+
+# remuevo "en diarrea"
+efectividad_tto_constipacion_dico$name <- str_remove(efectividad_tto_constipacion_dico$name, " en estreñimiento")
+
+# remuevo nombre de la primera columna
+colnames(efectividad_tto_constipacion_dico)[1] <- ""
+
+tabla_tto_constipacion_dico <- efectividad_tto_constipacion_dico %>%
+          kable(caption = 'Efectividad considerada para diversos tratamientos del SII-C') %>%
+  kable_styling(bootstrap_options = c("striped", "hover")) %>%
+   kable_classic(full_width = F, html_font = "Arial")
+
+ 
+tabla_tto_constipacion_dico    
+```
 
 
 
@@ -558,6 +624,20 @@ as.data.frame(a)
 
 
 
+## Analisis multivariado
+
+```{r}
+
+encuesta_filtrada <- encuesta %>%
+        filter
+
+
+library(survey)
+
+diseno <- svydesign(data = encuesta, repweights = NULL)
+
+analisis_multivar <- svyglm(encuesta~ Edad + factor(Genero) + factor('Región de residencia') + factor('Orientación dicotomica') + factor('Lugar de Trabajo'), design=diseno)
+```
 
 
 
