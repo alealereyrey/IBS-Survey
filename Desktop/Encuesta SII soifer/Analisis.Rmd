@@ -411,11 +411,60 @@ grafico_fisiopato_constipacion <- ggplot(fisiopato_constipacion, aes(x= `Fisiopa
                         scale_x_discrete(na.translate = FALSE) +
                         theme_bw() +
                         coord_flip() +
-        labs(title = "Fisiopatología más frecuente de la variante diarrea", x = "Fisiopatología", y = "Porcentaje de respuestas")
+        labs(title = "Fisiopatología más frecuente de la variante constipación", x = "Fisiopatología", y = "Porcentaje de respuestas")
 
 
 grafico_fisiopato_constipacion               
 ```
+
+## Grafico la fisiopatologia de acuerdo a la especialidad
+
+
+```{r}
+
+diarrea <- encuesta[,c(14,18:32, 74:79, 81)]
+
+fisiopato_diarrea <- diarrea %>%
+         group_by(`Orientación dicotómica`, `Fisiopatología más frecuente variante diarrea`) %>%
+                        summarise(n = n()) %>%
+                        mutate(Proporcion = round((n/sum(n))*100,1)) %>%
+                        ungroup()
+
+grafico_fisiopato_diarrea <- ggplot(fisiopato_diarrea, aes(x= `Fisiopatología más frecuente variante diarrea`, y = Proporcion, fill = `Orientación dicotómica`)) +
+        geom_col(na.rm = T, show.legend = T, position = "dodge") + 
+        geom_text(position = position_dodge(width = 1), aes (label = `Proporcion`), vjust = 0.5, hjust = -0.1) +
+                        scale_x_discrete(na.translate = FALSE) +
+                        theme_bw() +
+                        coord_flip() +
+        labs(title = "Fisiopatología más frecuente del SII-D", subtitle = "p-value = 0.5883", x = "Fisiopatología", y = "Porcentaje de respuestas") +
+        expand_limits(y = c(0, 60))
+
+grafico_fisiopato_diarrea
+
+
+fisiopato_constipacion <- encuesta %>%
+         group_by(`Orientación dicotómica`,`Fisiopatología más frecuente variante constipación`) %>%
+                        summarise(n = n()) %>%
+                        mutate(Proporcion = round((n/sum(n))*100,1)) %>%
+                        ungroup()
+
+grafico_fisiopato_constipacion <- ggplot(fisiopato_constipacion, aes(x= `Fisiopatología más frecuente variante constipación`, y = Proporcion, fill = `Orientación dicotómica`)) +
+                        geom_col(na.rm = T, show.legend = T, position = "dodge") + 
+        geom_text(position = position_dodge(width = 1), aes (label = `Proporcion`), vjust = 0.5, hjust = -0.1) +
+                        scale_x_discrete(na.translate = FALSE) +
+                        theme_bw() +
+                        coord_flip() +
+        labs(title = "Fisiopatología más frecuente del SII-C", subtitle = "p-value = 0.4221", x = "Fisiopatología", y = "Porcentaje de respuestas") +
+        expand_limits(y = c(0, 50))
+
+
+grafico_fisiopato_constipacion   
+
+t.test(Proporcion ~`Orientación dicotómica`, data=fisiopato_diarrea )
+
+t.test(Proporcion ~`Orientación dicotómica`, data=fisiopato_constipacion )
+```
+
 
 
 ## graficos de datos crudos: proporcion de pacientes con sii
@@ -445,19 +494,19 @@ proporcion_sii_edad
 
 
 
-## Separo en motilistas vs otros
+## Separo en neurogastros vs otros
 
 ```{r}
 
 encuesta<- encuesta %>%
-       mutate(`Orientación dicotomica` = if_else(str_detect(`Orientación prioritaria`,regex("Motilidad")), "Motilista", "No motilista"))
+       mutate(`Orientación dicotómica` = if_else(str_detect(`Orientación prioritaria`,regex("Motilidad")), "Neurogastro", "No neurogastro"))
 
 proporcion_sii_orientacion <- encuesta %>%
-        group_by(Edad_ordinal, `Orientación dicotomica`, `SII mensual`)%>%
+        group_by(Edad_ordinal, `Orientación dicotómica`, `SII mensual`)%>%
         summarise(n = n()) %>%
         mutate(Proporcion = round((n/sum(n))*100,1))
 
-ggplot(proporcion_sii_orientacion, aes(fill = `SII mensual`, y = Proporcion,  x = `Orientación dicotomica`)) +
+ggplot(proporcion_sii_orientacion, aes(fill = `SII mensual`, y = Proporcion,  x = `Orientación dicotómica`)) +
         geom_col(position = "dodge")  + 
         facet_wrap(~Edad_ordinal, scales="free", ncol = 2) +
         labs(title = "Proporción de consultas mensuales por SII", x = "Especialidad", y = "% de profesionales")
@@ -468,6 +517,31 @@ ggplot(proporcion_sii_orientacion, aes(fill = `SII mensual`, y = Proporcion,  x 
 
 
 
+## Metas en el tratamiento por edad
+
+```{r}
+chisq.test(encuesta$`Meta principal endel tratamiento del SII`, encuesta$Edad_ordinal)
+
+
+edad_metas <- encuesta %>%
+                        group_by(Edad_ordinal, `Meta principal endel tratamiento del SII`) %>%
+                        summarise(n = n()) %>%
+                        na.omit()%>%
+                        mutate(Proporcion = round((n/sum(n))*100,1)) %>%
+                        ungroup()
+
+
+as.factor(edad_metas$`Meta principal endel tratamiento del SII`)
+
+
+
+ggplot(edad_metas, aes(x=Edad_ordinal, y = Proporcion, fill = `Meta principal endel tratamiento del SII`)) +
+        geom_col(position = "dodge") +
+        geom_text(position = position_dodge2(width = 1), aes (label = `Proporcion`), vjust = -0.5) +
+       labs(title = "Metas del tratamiento del SII en funcion de la edad", subtitle = "X-squared = 4.0575, df = 2, p-value = 0.1315", x = "Edad", y = "Proporción") +
+        expand_limits(y = c(0, 60))
+        
+```
 
 
 
@@ -517,11 +591,11 @@ efectividad_tto_diarrea_dico <- encuesta[,c(18:32)] %>%
   count(name, value) %>%
   pivot_wider(names_from = value, values_from = n, values_fill = 0) %>%
         mutate("efectiva" = `algo efectiva` + `muy efectiva`) %>%
-                arrange(desc(`efectiva`)) %>%
         select(c(`name`,`efectiva`, `no efectiva`)) %>%
           adorn_percentages("row") %>%
   adorn_pct_formatting(digits = 1) %>%
-  adorn_ns()
+  adorn_ns()%>%
+arrange(desc(`efectiva`))
 
 # remuevo "en diarrea"
 efectividad_tto_diarrea_dico$name <- str_remove(efectividad_tto_diarrea_dico$name, " en diarrea")
@@ -534,11 +608,98 @@ tabla_tto_diarrea_dico <- efectividad_tto_diarrea_dico %>%
   kable_styling(bootstrap_options = c("striped", "hover")) %>%
    kable_classic(full_width = F, html_font = "Arial")
 
- 
-tabla_tto_diarrea_dico        
+tabla_tto_diarrea_dico 
 ```
 
 
+## Hago uno separando neurogastros de no neuro
+
+```{r}
+tto_diarrea_neurogastro<- encuesta[,c(18:32,81)] %>%
+        filter(`Orientación dicotómica` == "Neurogastro") %>%
+        pivot_longer(cols = everything()) %>%
+          count(name, value) %>%
+  pivot_wider(names_from = value, values_from = n, values_fill = 0) %>%
+        mutate("efectiva" = `algo efectiva` + `muy efectiva`)  %>%
+        select(c(`name`,`efectiva`, `no efectiva`)) %>%
+          adorn_percentages("row") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns() %>%
+                arrange(desc(`efectiva`))
+
+
+tto_diarrea_otros <- encuesta[,c(18:32,81)] %>%
+        filter(`Orientación dicotómica` != "Neurogastro") %>%
+        pivot_longer(cols = everything()) %>%
+          count(name, value) %>%
+  pivot_wider(names_from = value, values_from = n, values_fill = 0) %>%
+        mutate("efectiva" = `algo efectiva` + `muy efectiva`) %>%
+        select(c(`name`,`efectiva`, `no efectiva`)) %>%
+          adorn_percentages("row") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns() %>%
+                arrange(desc(`efectiva`))
+
+
+# remuevo "en diarrea"
+tto_diarrea_neurogastro$name <- str_remove(tto_diarrea_neurogastro$name, " en diarrea")
+tto_diarrea_otros$name <- str_remove(tto_diarrea_otros$name, " en diarrea")
+
+
+## elimino la ultima fila y las columnas repetidas
+tto_diarrea_neurogastro<- tto_diarrea_neurogastro[-(16),]
+tto_diarrea_otros <- tto_diarrea_otros[-(16),]
+
+# remuevo nombre de la primera columna
+colnames(tto_diarrea_neurogastro)[1] <- ""
+colnames(tto_diarrea_otros)[1] <- ""
+
+
+# Creo las tablas
+tabla_diarrea_neurogastro<- tto_diarrea_neurogastro %>%
+          kable(caption = 'Efectividad considerada por neurogastros para diversos tratamientos del SII-D') %>%
+  kable_styling(bootstrap_options = c("striped", "hover")) %>%
+   kable_classic(full_width = F, html_font = "Arial")
+
+tabla_diarrea_neurogastro
+
+tabla_diarrea_otros<- tto_diarrea_otros %>%
+          kable(caption = 'Efectividad considerada por otros especialistas para diversos tratamientos del SII-D') %>%
+  kable_styling(bootstrap_options = c("striped", "hover")) %>%
+   kable_classic(full_width = F, html_font = "Arial")
+
+tabla_diarrea_otros
+```
+
+
+
+## Junto los 2 dfs de diarrea en uno solo
+
+```{r}
+
+df_tto <- cbind(tto_diarrea_neurogastro,tto_diarrea_otros) 
+
+df_final <- as.data.frame(as.matrix(df_tto[-4]) %>%
+  list(name = df_tto$name, Neurogastro = df_tto[, c(2,3)], No_neurogastro = df_tto[,c(5,6)])) 
+
+# remuevo "en diarrea"
+df_final$name <- str_remove(df_final$name, " en diarrea")
+
+
+## elimino la ultima fila y las columnas repetidas
+df_final <- df_final[-(16),-(2:6)]
+
+
+# remuevo nombre de la primera columna
+colnames(df_final)[1] <- ""
+
+tabla_final_diarrea <- df_final %>%
+          kable(caption = 'Efectividad considerada para diversos tratamientos del SII-D') %>%
+  kable_styling(bootstrap_options = c("striped", "hover")) %>%
+   kable_classic(full_width = F, html_font = "Arial")
+
+tabla_final_diarrea 
+```
 
 
 ## Resultados tratamiento
@@ -579,11 +740,11 @@ efectividad_tto_constipacion_dico <- encuesta[,c(33:43)] %>%
   count(name, value) %>%
   pivot_wider(names_from = value, values_from = n, values_fill = 0) %>%
         mutate("efectiva" = `algo efectiva` + `muy efectiva`) %>%
-                arrange(desc(`efectiva`)) %>%
         select(c(`name`,`efectiva`, `no efectiva`)) %>%
           adorn_percentages("row") %>%
   adorn_pct_formatting(digits = 1) %>%
-  adorn_ns()
+  adorn_ns() %>%
+ arrange(desc(`efectiva`))
 
 # remuevo "en diarrea"
 efectividad_tto_constipacion_dico$name <- str_remove(efectividad_tto_constipacion_dico$name, " en estreñimiento")
@@ -600,7 +761,89 @@ tabla_tto_constipacion_dico <- efectividad_tto_constipacion_dico %>%
 tabla_tto_constipacion_dico    
 ```
 
+## Hago la separacion por especialidad para constipacion
+```{r}
+tto_constipacion_neurogastro<- encuesta[,c(33:43,81)] %>%
+        filter(`Orientación dicotómica` == "Neurogastro") %>%
+        pivot_longer(cols = everything()) %>%
+          count(name, value) %>%
+  pivot_wider(names_from = value, values_from = n, values_fill = 0) %>%
+        mutate("efectiva" = `algo efectiva` + `muy efectiva`) %>%
+        select(c(`name`,`efectiva`, `no efectiva`)) %>%
+          adorn_percentages("row") %>%
+        arrange(desc(`efectiva`))%>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns() 
 
+        
+
+tto_constipacion_otros <- encuesta[,c(33:43,81)] %>%
+        filter(`Orientación dicotómica` != "Neurogastro") %>%
+        pivot_longer(cols = everything()) %>%
+          count(name, value) %>%
+  pivot_wider(names_from = value, values_from = n, values_fill = 0) %>%
+        mutate("efectiva" = `algo efectiva` + `muy efectiva`) %>%
+        select(c(`name`,`efectiva`, `no efectiva`)) %>%
+          adorn_percentages("row") %>%
+        arrange(desc(`efectiva`)) %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns()
+
+# remuevo "en estreñimiento"
+tto_constipacion_neurogastro$name <- str_remove(tto_constipacion_neurogastro$name, " en estreñimiento")
+tto_constipacion_otros$name <- str_remove(tto_constipacion_otros$name, " en estreñimiento")
+
+
+## elimino la ultima fila y las columnas repetidas
+tto_constipacion_neurogastro<- tto_constipacion_neurogastro[-(12),]
+tto_constipacion_otros <- tto_constipacion_otros[-(12),]
+
+# remuevo nombre de la primera columna
+colnames(tto_constipacion_neurogastro)[1] <- ""
+colnames(tto_constipacion_otros)[1] <- ""
+
+
+# Creo las tablas
+tabla_constipacion_neurogastro<- tto_constipacion_neurogastro %>%
+          kable(caption = 'Efectividad considerada por neurogastros para diversos tratamientos del SII-C') %>%
+  kable_styling(bootstrap_options = c("striped", "hover")) %>%
+   kable_classic(full_width = F, html_font = "Arial")
+
+tabla_constipacion_neurogastro
+
+tabla_constipacion_otros<- tto_constipacion_otros %>%
+          kable(caption = 'Efectividad considerada por otros especialistas para diversos tratamientos del SII-C') %>%
+  kable_styling(bootstrap_options = c("striped", "hover")) %>%
+   kable_classic(full_width = F, html_font = "Arial")
+
+tabla_constipacion_otros
+        
+        
+## tengo que unir tablas de otra forma porque no tienen el mismo orden
+
+df_tto_constipacion <- cbind(tto_constipacion_neurogastro,tto_constipacion_otros) 
+
+df_final_constipacion <- as.data.frame(as.matrix(df_tto_constipacion[-4]) %>%
+  list(name = df_tto_constipacion$name, Neurogastro = df_tto_constipacion[, c(2,3)], No_neurogastro = df_tto_constipacion[,c(5,6)])) 
+
+# remuevo "en diarrea"
+df_final_constipacion$name <- str_remove(df_final_constipacion$name, " en diarrea")
+
+
+## elimino la ultima fila y las columnas repetidas
+df_final_constipacion <- df_final_constipacion[-(12),-(2:6)]
+
+
+# remuevo nombre de la primera columna
+colnames(df_final_constipacion)[1] <- ""
+
+tabla_final_constipacion<- df_final_constipacion %>%
+          kable(caption = 'Efectividad considerada para diversos tratamientos del SII-C') %>%
+  kable_styling(bootstrap_options = c("striped", "hover")) %>%
+   kable_classic(full_width = F, html_font = "Arial")
+
+tabla_final_constipacion
+```
 
 
 ## Construyo una tabla 1
