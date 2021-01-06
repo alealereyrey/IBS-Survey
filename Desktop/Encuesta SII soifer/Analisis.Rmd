@@ -20,6 +20,7 @@ library(qdapTools)
 library(janitor)
 library(tableone)
 library(kableExtra)
+library(extrafont)
 ```
 
 ## Cargo las bases de datos y evalúo como estan nombradas las columnas
@@ -190,7 +191,10 @@ piramide <- ggplot(dfpiramide2, aes(x = Edad_ordinal, y = Especialistas, fill = 
                scale_y_continuous(breaks = seq(-40, 40, by = 5), 
                      labels = c(rev(seq(0, 40, by = 5)), seq(5, 40, by = 5))) + 
   scale_fill_manual(values = c("cornflowerblue", "#E76BF3")) +
-        labs(title = "Distribución de profesionales según edad y género", y = "Nro de especialistas", x = "Edad")
+        labs(title = "Distribución de profesionales según edad y género", y = "Nro de especialistas", x = "Edad", fill = "Género", caption = "Gráfico 1: Distribución de los profesionales encuestados según género y edad") +
+        theme(text = element_text(family = "serif", size = 12),
+              plot.title = element_text(family = "serif", size = 12, face = "bold"),
+              plot.caption = element_text(hjust = 0, family = "serif", size = 12))
 
 piramide
 
@@ -846,6 +850,7 @@ tabla_final_constipacion
 ```
 
 
+
 ## Construyo una tabla 1
 
 ```{r}
@@ -865,8 +870,6 @@ as.data.frame(a)
 
 
 
-
-
 ## Analisis multivariado
 
 ```{r}
@@ -881,6 +884,54 @@ diseno <- svydesign(data = encuesta, repweights = NULL)
 
 analisis_multivar <- svyglm(encuesta~ Edad + factor(Genero) + factor('Región de residencia') + factor('Orientación dicotomica') + factor('Lugar de Trabajo'), design=diseno)
 ```
+
+
+
+
+## Efectividad rifaximina en funcion de edad
+
+```{r}
+
+efectividad_rifa <- encuesta[,c(33:43,81)] %>%
+        group_by()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
