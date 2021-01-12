@@ -106,7 +106,8 @@ encuesta <- encuesta %>%
                                                   `Provincia de residencia` %in% c("La Pampa", "Río Negro", "Santa Cruz", "Chubut", "Neuquén") ~ "Patagonia", 
                                                   `Provincia de residencia` %in% c("Santa Fe", "Córdoba", "Entre Ríos", "Buenos Aires") ~"Centro",
                                                   `Provincia de residencia` %in% c("San Luis", "Mendoza") ~"Cuyo",
-               T ~ `Provincia de residencia`
+               T ~ `Provincia de residencia`),
+               `Orientación dicotómica` = if_else(str_detect(`Orientación prioritaria`,regex("Motilidad")), "Neurogastro", "No neurogastro"
                )) %>%
         separate(., col = 18, into = "Loperamida en diarrea", sep = ";", extra = "drop", fill = "right")%>%
         separate(., col = 19, into = "Carbón en diarrea", sep = ";", extra = "drop", fill = "right")%>%
@@ -135,6 +136,12 @@ encuesta <- encuesta %>%
         separate(., col = 42, into = "Senósidos en estreñimiento", sep = ";", extra = "drop", fill = "right")%>%
         separate(., col = 43, into = "Dieta en estreñimiento", sep = ";", extra = "drop", fill = "right")
 
+encuesta_trabajo <- mtabulate(strsplit(encuesta$`Lugar de Trabajo`, " y ")) %>%
+        mutate(`Centro médico` = `centro médico privado` + `Centro médico privado` + `Céntro médico`,
+               `Consultorio privado` = `Consultorio privado` + `consultorio médico privado` +`consultorio privado`) %>%
+        select(c(`Centro médico`, `Consultorio privado`, Hospital)) 
+
+encuesta <- cbind(encuesta, encuesta_trabajo)
 ```
 
 ## Factorizo la efectividad de los tratamientos
@@ -341,6 +348,7 @@ grafico_orientacion <- ggplot(tabla_trabajo,
                         
 
 grafico_orientacion
+
 ```
 
 
@@ -547,7 +555,8 @@ ggplot(edad_metas, aes(x=Edad_ordinal, y = Proporcion, fill = `Meta principal en
         geom_col(position = "dodge") +
         geom_text(position = position_dodge2(width = 1), aes (label = `Proporcion`), vjust = -0.5) +
        labs(title = "Metas del tratamiento del SII en funcion de la edad", subtitle = "X-squared = 4.0575, df = 2, p-value = 0.1315", x = "Edad", y = "%", fill = "Meta principal") +
-        expand_limits(y = c(0, 60))
+        expand_limits(y = c(0, 95)) +
+        scale_fill_manual(values = c("aquamarine3", "darkorchid3"))
         
 ```
 
@@ -861,15 +870,22 @@ tabla_final_constipacion
 
 library(tableone)
 
-listVars <- c("Edad", "Región de residencia", "Orientación dicotomica", "Lugar de Trabajo")
+listVars <- c("Edad", "Región de residencia", "Orientación dicotómica", "Centro médico", "Consultorio privado", "Hospital")
 
-catVars <- c("Región de residencia", "Orientación dicotomica", "Lugar de Trabajo")
+catVars <- c("Región de residencia", "Orientación dicotomica", "Centro médico", "Consultorio privado", "Hospital")
 
 table1 <- CreateTableOne(vars = listVars, data = encuesta, factorVars = catVars, strata = c("Genero"))
 
-a <- print(table1, quote = TRUE, noSpaces = TRUE)
+a <- print(table1, quote = F, noSpaces = F)
 
 as.data.frame(a)
+
+tabla1 <- a %>%
+        kable(caption = 'Tabla 1') %>%
+  kable_styling(bootstrap_options = c("striped", "hover")) %>%
+   kable_classic(full_width = F, html_font = "Arial")
+
+tabla1
 ```
 
 
