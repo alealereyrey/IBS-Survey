@@ -1,0 +1,1588 @@
+---
+title: "Encuesta SII"
+author: "Ale"
+date: "2 de septiembre de 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Cargo todas las librerías que voy a usar
+
+```{r echo=TRUE, results='hide'}
+library(tidyverse)
+library(dplyr)
+library(gapminder)
+library(readxl)
+library(qdapTools)
+library(janitor)
+library(tableone)
+library(kableExtra)
+library(extrafont)
+library(table1)
+
+```
+## Indico que la separación por decimales sea con , 
+```{r}
+options(OutDec= ",")
+```
+
+
+## Cargo las bases de datos y evalúo como estan nombradas las columnas
+
+```{r}
+encuesta <- read.csv("C:/Users/Ale/Desktop/Encuesta SII soifer/SII en Argentina.csv", fileEncoding = "UTF-8", na.strings="")
+options(OutDec= ",")
+
+                       
+```
+
+## Renombro las columnas (preguntas)
+
+```{r}
+
+names(encuesta) <- c("Fecha", "DNI", "Edad", "Genero","Provincia de residencia", "Ciudad donde ejerce", "Orientación prioritaria","Lugar de Trabajo", "SII mensual", "Criterio diagnóstico SII", "¿Existe SII sin dolor?", "Variante más frecuente", "Variantes que puede pasar por alto una patología orgánica", "Fisiopatología más frecuente variante diarrea", "Fisiopatología más frecuente variante constipación", "Variantes con más psico-comorbilidad", "Variantes con menos alternativas terapéuticas", "Loperamida en diarrea", "Carbón en diarrea", "Bismuto en diarrea", "Rifaximina en diarrea", "Otros ATB en diarrea", "Probióticos en diarrea", "Trimebutina en diarrea", "Trimebutina/simeticona en diarrea", "Alverina/simeticona en diarrea", "Pinaverio en diarrea", "Otilonio en diarrea", "Colestiramina en diarrea", "Amitriptilina en diarrea", "Antiespasmódicos ansiolíticos en diarrea", "Dieta en diarrea", "Polietilenglicol en estreñimiento", "Psyllium en estreñimiento", "Lactulosa en estreñimiento", "Linaclotida en estreñimiento", "Prucalopride en estreñimiento", "Sales biliares en estreñimiento", "Trimebutina en estreñimiento", "Bisacodilo/picosulfato en estreñimiento", "Antibióticos en estreñimiento", "Senósidos en estreñimiento", "Dieta en estreñimiento", "¿Considera primero evitar medicación y emplear dieta y productos naturales?", "Indicación de antidepresivos", "Utiliza terapias alternativas en el SII", "Meta principal endel tratamiento del SII", "Nivel de frustración", "Tratamiento más complejo en género", "¿Le desagrada que el paciente concurra con información de internet y discuta con ud?", "¿Qué perfil/es de personalidad de su paciente le resula más dificil abordar?", "¿Preferiría de ser posible dejar de atender este tipo de pacientes?", "Con respecto a los estudios previos del paciente", "¿Cuánto tiempo le demanda el paciente funcional en relación a otras patologías¿", "En caso que considere que le lleva más tiempo, ¿Eso lo incomoda?", "Considera que estuchar al paciente:", "¿Qué tipo de escucha realiza?", "En caso de considerar que su escucha es insuficiente, esto se debe a:", "¿Cuánto tiempo le dedica a la primera consulta?", "Considera que la educación que se le brinda a los pacientes:", "¿Cuánto del tratamiento considera que depende del paciente?", "¿Cree que los pacientes con SII se preocupan demasiado por su trastorno?", "¿Cree que los pacientes con SII consultan principalmente por miedo a padecer cáncer?", "¿Considera que el componente psicológico en estos pacientes es más importante que el biológico?", "¿Considera que estos pacientes deben ser derivados a una terapia psicológica?", "Trabaja ud. en equipo con:", "¿Cuál es su vía de comunicación preferente con su paciente?", "¿Pregunta sobre la posibilidad de abusos como disparadores de la sintomatología?", "Si la respuesta es afirmativa, ¿Lo interroga en la primera consulta?", "¿Pregunta de la misma manera sobre abuso si el paciente es hombre o mujer?", "¿Cuán satisfecho se encuentra con su práctica clínica en el paciente con SII?", "¿Qué otras condiciones siente que necesitaría para optimizarla?")
+
+
+```
+
+##Exploración de missing values
+
+```{r}
+# Definir una funcion que cuente los NaNs y aplicarla al dataframe
+
+na_count <- sapply(encuesta, function(y) sum(length(which(is.na(y)))))
+
+
+#Creo un dataframe con los valores nulos
+
+na_count <- data.frame(na_count)
+na_count
+
+```
+
+
+## Limpieza
+
+Una de las observaciones que dice hombre;mujer, la renombro hombre. 
+Limpio iterando sobre unique
+Limpio los medicamentos que tienen mas de una opcion
+
+Agrego columnas:
+-Edad ordinalizada
+-Region de residencia
+-Orientación dicotómica
+
+```{r}
+encuesta$Genero[181] <- "Hombre"
+
+unique(encuesta$`Ciudad donde ejerce`)
+
+encuesta <- encuesta %>%
+                mutate(`Provincia de residencia` = case_when(str_detect(`Provincia de residencia`, regex("caba|C.A.B.A|ciudad|capital|a(i|u)res|bs as", ignore_case = T)) ~"Buenos Aires", 
+                                                             str_detect(`Provincia de residencia`, regex("c(o|ó)rdoba", ignore_case = T)) ~ "Córdoba",
+                                                             str_detect(`Provincia de residencia`, regex("chubut", ignore_case = T)) ~ "Chubut",
+                                                             str_detect(`Provincia de residencia`, regex("entre r(i|í)os", ignore_case = T)) ~ "Entre Ríos",
+                                                             str_detect(`Provincia de residencia`, regex("negro", ignore_case = T)) ~ "Río Negro",
+                                                             str_detect(`Provincia de residencia`, regex("neuqu(e|é)n", ignore_case = T)) ~ "Neuquén",
+                                                             str_detect(`Provincia de residencia`, regex("chac", ignore_case = T)) ~ "Chaco",
+                                                             str_detect(`Provincia de residencia`, regex("tuc", ignore_case = T)) ~ "Tucumán",
+                                                             str_detect(`Provincia de residencia`, regex("salta", ignore_case = T)) ~ "Salta",
+                                                             str_detect(`Provincia de residencia`, regex("mendoza", ignore_case = T)) ~ "Mendoza",
+                                                              str_detect(`Provincia de residencia`, regex("Formosa", ignore_case = T)) ~ "Formosa",
+                                                              str_detect(`Provincia de residencia`, regex("rioja", ignore_case = T)) ~ "La Rioja",
+                                                              str_detect(`Provincia de residencia`, regex("santiago del estero", ignore_case = T)) ~ "Santiago del Estero",
+                                                             str_detect(`Provincia de residencia`, regex("santa fe|sta fe|sfe", ignore_case = T)) ~ "Santa Fe", T ~ `Provincia de residencia`),
+                       `Ciudad donde ejerce`= case_when(str_detect(`Ciudad donde ejerce`, regex("mar del plata", ignore_case = T)) ~ "Mar del plata",
+                                                        str_detect(`Ciudad donde ejerce`, regex("resistencia", ignore_case = T)) ~ "Resistencia",
+                                                        str_detect(`Ciudad donde ejerce`, regex("mendoza", ignore_case = T)) ~ "Mendoza",
+                                                        str_detect(`Ciudad donde ejerce`, regex("salta", ignore_case = T)) ~ "Salta",
+                                                        str_detect(`Ciudad donde ejerce`, regex("rosario", ignore_case = T)) ~ "Rosario",
+                                                        str_detect(`Ciudad donde ejerce`, regex("c(o|ó)rdoba", ignore_case = T)) ~ "Córdoba",
+                                                        str_detect(`Ciudad donde ejerce`, regex("Peña", ignore_case = T)) ~ "PR Saenz Peña",
+                                                        str_detect(`Ciudad donde ejerce`, regex("General Roca", ignore_case = T)) ~ "Gral Roca",
+                                                        str_detect(`Ciudad donde ejerce`, regex("Pico", ignore_case = T)) ~ "Gral Pico",
+                                                        str_detect(`Ciudad donde ejerce`, regex("Paran(a|á)", ignore_case = T)) ~ "Paraná",
+                                                        str_detect(`Ciudad donde ejerce`, regex("tucuman|SMT", ignore_case = T)) ~ "SM Tucuman",
+                                                        str_detect(`Ciudad donde ejerce`, regex("C.A.B.A.|CABA|Buenos|bs as|capital federal|capital$|Morón|Pilar|Lujan|La plata|Varela|Mejía|Quilmes|Palomar|Isidro|Vicente|cas$|Zamora|Campana|argentina", ignore_case = T)) & `Provincia de residencia` == "Buenos Aires"  ~ "AMBA",
+                                                   T ~ `Ciudad donde ejerce`),
+                       `Fisiopatología más frecuente variante diarrea` = case_when(str_detect(`Fisiopatología más frecuente variante diarrea`,regex("medicamentos")) ~ "Medicamentos",
+                                                                           str_detect(`Fisiopatología más frecuente variante diarrea`,regex("Disbiosis")) ~ "Disbiosis/sobrecrecimiento", T ~`Fisiopatología más frecuente variante diarrea`),
+                       Edad_ordinal = cut(Edad, 3, labels=c("< 40","41-65"," > 65")),
+                       `Región de residencia` = case_when(`Provincia de residencia` %in% c("Salta", "Jujuy", "Santiago del Estero", "Catamarca", "Tucumán", "La Rioja") ~ "NOA", 
+                                                  `Provincia de residencia` %in% c("Formosa", "Chaco", "Misiones", "Corrientes") ~"NEA",
+                                                  `Provincia de residencia` %in% c("La Pampa", "Río Negro", "Santa Cruz", "Chubut", "Neuquén") ~ "Patagonia", 
+                                                  `Provincia de residencia` %in% c("Santa Fe", "Córdoba", "Entre Ríos", "Buenos Aires") ~"Centro",
+                                                  `Provincia de residencia` %in% c("San Luis", "Mendoza") ~"Cuyo",
+               T ~ `Provincia de residencia`),
+               `Orientación dicotómica` = if_else(str_detect(`Orientación prioritaria`,regex("Motilidad")), "Neurogastro", "No neurogastro"
+               )) %>%
+        separate(., col = 18, into = "Loperamida en diarrea", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 19, into = "Carbón en diarrea", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 20, into = "Bismuto en diarrea", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 21, into = "Rifaximina en diarrea", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 22, into = "Otros antibióticos en diarrea", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 23, into = "Probióticos en diarrea", sep = ";", extra = "drop", fill = "right") %>%
+        separate(., col = 24, into = "Trimebutina en diarrea", sep = ";", extra = "drop", fill = "right") %>%
+        separate(., col = 25, into = "Trimebutina/simeticona en diarrea", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 26, into = "Alverina/simeticona en diarrea", sep = ";", extra = "drop", fill = "right") %>%
+        separate(., col = 27, into = "Pinaverio en diarrea", sep = ";", extra = "drop", fill = "right") %>%
+        separate(., col = 28, into = "Otilonio en diarrea", sep = ";", extra = "drop", fill = "right") %>%
+        separate(., col = 29, into = "Colestiramina en diarrea", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 30, into = "Amitriptilina en diarrea", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 31, into = "Antiespasmódicos en diarrea", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 32, into = "Dieta en diarrea", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 33, into = "Polietilenglicol en estreñimiento", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 34, into = "Psyllium en estreñimiento", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 35, into = "Lactulosa en estreñimiento", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 36, into = "Linaclotida en estreñimiento", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 37, into = "Prucalopride en estreñimiento", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 38, into = "Sales biliares en estreñimiento", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 39, into = "Trimebutina en estreñimiento", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 40, into = "Bisacodilo/picosulfato en estreñimiento", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 41, into = "Antibióticos en estreñimiento", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 42, into = "Senósidos en estreñimiento", sep = ";", extra = "drop", fill = "right")%>%
+        separate(., col = 43, into = "Dieta en estreñimiento", sep = ";", extra = "drop", fill = "right")
+
+encuesta_trabajo <- mtabulate(strsplit(encuesta$`Lugar de Trabajo`, " y ")) %>%
+        mutate(`Centro médico` = `centro médico privado` + `Centro médico privado` + `Céntro médico`,
+               `Consultorio privado` = `Consultorio privado` + `consultorio médico privado` +`consultorio privado`) %>%
+        select(c(`Centro médico`, `Consultorio privado`, Hospital)) 
+
+encuesta <- cbind(encuesta, encuesta_trabajo)
+```
+
+## Factorizo la efectividad de los tratamientos
+
+```{r}
+cols <- c("Loperamida en diarrea", "Carbón en diarrea",  "Bismuto en diarrea", "Rifaximina en diarrea", "Otros antibióticos en diarrea",    "Probióticos en diarrea", "Trimebutina en diarrea", "Trimebutina/simeticona en diarrea", "Alverina/simeticona en diarrea", "Pinaverio en diarrea", "Otilonio en diarrea", "Colestiramina en diarrea", "Amitriptilina en diarrea", "Antiespasmódicos en diarrea", "Dieta en diarrea","Polietilenglicol en estreñimiento","Psyllium en estreñimiento", "Lactulosa en estreñimiento", "Linaclotida en estreñimiento", "Prucalopride en estreñimiento", "Sales biliares en estreñimiento" , "Trimebutina en estreñimiento", "Bisacodilo/picosulfato en estreñimiento", "Antibióticos en estreñimiento", "Senósidos en estreñimiento", "Dieta en estreñimiento" )
+
+encuesta[cols] <- lapply(encuesta[cols], tolower)
+encuesta[cols] <- lapply(encuesta[cols], factor, levels = c("muy efectiva", "algo efectiva", "no efectiva", "no se"), ordered = T)
+                      
+```
+
+
+## Calculo mínimos y máximos de edad de gastros y las medidas de distribución central y CI
+
+```{r}
+
+min(encuesta$Edad)
+max(encuesta$Edad)
+mean(encuesta$Edad)
+median(encuesta$Edad)
+Rmisc::CI(encuesta$Edad, ci = 0.95)
+
+getmode <- function(x) {
+   uniq <- unique(x)
+   uniq[which.max(tabulate(match(x, uniq)))]
+}
+
+getmode(encuesta$Edad)
+```
+
+## Grafico pirámide poblacional
+Para eso necesitamos transformar la edad en una variable ordinal
+Luego paso el numero de especialistas a double para poder multiplicar los hombres por -1 para que quede como pirámide poblacional. 
+
+
+```{r}
+
+dfpiramide <- encuesta %>%
+        mutate (Edad_ordinal = cut(Edad, 11, labels=c("26-30","31-35","36-40","41-45","46-50","51-55","56-60","61-65","66-70","71-75","76+")))%>%
+                group_by(Edad_ordinal) %>%
+        count(Genero, name = "especialistas")%>%
+        ungroup
+
+dfpiramide$especialistas <- as.double(dfpiramide$especialistas)
+
+dfpiramide2 <- dfpiramide %>%
+        mutate(especialistas = if_else(Genero == "Hombre", -1*especialistas, especialistas))
+
+
+piramide <- ggplot(dfpiramide2, aes(x = Edad_ordinal, y = especialistas, fill = Genero)) + 
+  geom_bar(stat = "identity") + 
+                 coord_flip() + 
+               scale_y_continuous(breaks = seq(-40, 40, by = 5), 
+                     labels = c(rev(seq(0, 40, by = 5)), seq(5, 40, by = 5))) + 
+  scale_fill_manual(values = c("cornflowerblue", "#E76BF3")) +
+        labs(y = "N° de especialistas", x = "Edad", fill = "Género") +
+        theme(text = element_text(family = "serif", size = 12),
+              plot.title = element_text(family = "serif", size = 12, face = "bold"),
+              plot.caption = element_text(hjust = 0, family = "serif", size = 12))
+
+piramide
+
+```
+
+
+## Calculo la distribución geográfica de los especialistas según provincia
+Veo que falta tidy. 
+
+```{r}
+
+head(encuesta)
+
+distribucion_residencia <- encuesta%>%
+                        na.omit(`Provincia de residencia`) %>%
+                        group_by(Genero)%>%
+                        count(`Provincia de residencia`, `Ciudad donde ejerce`, `Región de residencia`, name = "Especialistas") %>%
+                        ungroup()
+
+
+grafico_residencia <- ggplot(distribucion_residencia, aes(x = `Provincia de residencia`, y = Especialistas, fill = Genero)) +
+                                     geom_bar(stat = "identity", position = "dodge", na.rm = T) +
+                                coord_flip() + 
+                   scale_y_continuous(breaks = seq(0, 90, by = 10)) +
+                   labs(title = "Especialistas según provincia de residencia", subtitle = "Distribución según género") +
+                           scale_fill_manual(values = c("cornflowerblue", "#E76BF3"))
+
+grafico_residencia
+
+```
+
+```{r}
+ciudad_buenos_aires <- distribucion_residencia %>%
+                                filter(distribucion_residencia$`Provincia de residencia` %in% "Buenos Aires")
+
+grafico_ciudad_buenos_aires <- ggplot(ciudad_buenos_aires,
+                          aes(x = `Ciudad donde ejerce`, y = Especialistas, fill = `Ciudad donde ejerce`)) +
+                        geom_bar(position = "dodge", stat = "identity") +
+        labs(title = "Ciudad de ejercicio de la profesión", subtitle = "Residencia Provincia de Buenos Aires") +
+                              theme_bw() +
+        coord_flip()
+        
+                          
+resto_del_pais <- distribucion_residencia %>%
+                 filter(distribucion_residencia$`Provincia de residencia` != "Buenos Aires")
+
+
+grafico_resto_del_pais<- ggplot(resto_del_pais,
+                          aes(x = `Provincia de residencia`, y = Especialistas, fill = `Ciudad donde ejerce`)) +
+                        geom_bar(position = "dodge", stat = "identity") +
+                              theme_bw() +
+                        coord_flip() 
+
+
+                         labs(title = "Ciudad de ejercicio de la profesión", subtitle = "Residencia resto del país") +
+                facet_wrap(~`Provincia de residencia`)
+
+                         
+                         
+grafico_resto_del_pais                         
+                         
+                         
+                         
+grafico_ciudad_buenos_aires
+```
+
+
+```{r}
+
+grafico_regiones<- ggplot(distribucion_residencia,
+                          aes(x = `Provincia de residencia`, y = Especialistas, fill = `Provincia de residencia`)) +
+                        geom_bar(position = "dodge", stat = "identity") +
+                              theme_bw() +
+        coord_flip() +
+                     facet_wrap(~`Región de residencia`, scales="free", ncol = 2) +
+        labs(title = "Especialistas según región de residencia", y="N° de especialistas")
+
+grafico_regiones
+```
+
+## Grafico orientacion
+
+```{r}
+
+unique(encuesta$`Orientación prioritaria`)
+
+## tabular la especialidad
+tabla_orientacion <- mtabulate(strsplit(encuesta$`Orientación prioritaria`, ";")) %>%
+                         summarise_all(.funs = sum,na.rm=T) %>%
+                        pivot_longer(cols = 1:6, names_to = "Orientación", values_to = "Médicos") %>%
+        mutate(`Orientación` = fct_reorder(`Orientación`,`Médicos`))
+
+grafico_orientacion <- 
+        ggplot(tabla_orientacion,
+                             aes (x= `Orientación`, y = `Médicos`, fill = `Orientación`)) +
+                         geom_col() + 
+        theme(axis.text.y=element_blank()) +
+                scale_fill_brewer(palette = "Accent")+ 
+        coord_flip () +
+        expand_limits(y = c(0,280)) +
+        labs (title = "Orientación prioritaria en la especialidad",y = "N° de médicos") +
+        geom_text(position = position_dodge2(width = 1), aes (label = `Médicos`), vjust = 0.5, hjust = -0.5)
+                        
+
+grafico_orientacion
+```
+
+
+## Grafico lugar de trabajo
+
+
+```{r}
+unique(encuesta$`Lugar de Trabajo`)
+
+tabla_trabajo <- mtabulate(strsplit(encuesta$`Lugar de Trabajo`, " y ")) %>%
+                         summarise_all(.funs = sum,na.rm=T) 
+
+tabla_trabajo$`Centro medico` <- tabla_trabajo$`Céntro médico` + tabla_trabajo$`centro médico privado` + tabla_trabajo$`Centro médico privado`
+
+tabla_trabajo$`Consultorio privado` <- tabla_trabajo$`Consultorio privado` + tabla_trabajo$`consultorio médico privado` + tabla_trabajo$`consultorio privado`
+
+tabla_trabajo <- subset(tabla_trabajo, select = c(`Consultorio privado`, `Centro medico`, `Hospital`)) %>%
+                        pivot_longer(cols = 1:3, names_to = "Centro", values_to = "Médicos")
+
+
+grafico_orientacion <- ggplot(tabla_trabajo,
+                             aes (x= `Centro`, y = `Médicos`, fill = `Centro`)) +
+                         geom_col() + 
+                scale_fill_brewer(palette = "Pastel1")+ 
+        expand_limits(y = c(0, 230)) +
+                 labs (title = "Tipo de centro de salud") +
+        geom_text(position = position_dodge2(width = 1), aes (label = `Médicos`), vjust = -0.5)
+        
+                        
+
+grafico_orientacion
+
+```
+
+
+## Asociación entre criterio diagnóstico y dolor
+
+```{r}
+chisq.test(encuesta$`Criterio diagnóstico SII`, encuesta$`¿Existe SII sin dolor?`)
+
+diagnostico_dolor <- encuesta %>%
+                        group_by(`Criterio diagnóstico SII`, `¿Existe SII sin dolor?`) %>%
+                        summarise(n = n()) %>%
+                        mutate(Proporcion = round((n/sum(n))*100,1)) %>%
+                        ungroup()
+
+                       
+diagnostico_dolor[1:3, 1] <- "Experiencia personal"
+diagnostico_dolor[4:6, 1] <- "Criterios de Roma"
+
+
+str(diagnostico_dolor)
+
+as.factor(c(diagnostico_dolor$`¿Existe SII sin dolor?`, diagnostico_dolor$`Criterio diagnóstico SII`))
+
+
+ggplot(diagnostico_dolor, aes(x=`Criterio diagnóstico SII`, y = Proporcion, fill = `¿Existe SII sin dolor?`)) +
+        geom_col(position = "dodge") +
+       theme_bw()
+
+ggplot(diagnostico_dolor, aes(x=`Criterio diagnóstico SII`, y = Proporcion, fill = `¿Existe SII sin dolor?`)) +
+        geom_col(position = "dodge") +
+        geom_text(position = position_dodge2(width = 1), aes (label = `Proporcion`), vjust = -0.5) +
+       labs(title = "Existencia de SII sin dolor según el criterio utilizado para el diagnóstico", subtitle = "X-squared = 15.617, p-value = 0.0004063", x = "Criterio diagnóstico utilizado", y = "Porcentaje de respuesta") +
+        expand_limits(y = c(0, 60))
+        
+
+```
+
+
+## analizo fisiopatología y tto de variante diarrea
+Para esto acorto el valor medicamentos y limpio las observaciones de los tratamientos (tienen por error 2 opciones en algunas observaciones)
+
+grafico la fisiopatologia
+
+```{r}
+
+fisiopato_diarrea <- encuesta %>%
+         group_by(`Fisiopatología más frecuente variante diarrea`) %>%
+                        summarise(n = n()) %>%
+                        mutate(Proporcion = round((n/sum(n))*100,1)) %>%
+                        ungroup()
+grafico_fisiopato_diarrea <- ggplot(fisiopato_diarrea, aes(x= `Fisiopatología más frecuente variante diarrea`, y = Proporcion, fill = Proporcion)) +
+                        geom_col(na.rm = T, show.legend = FALSE) + 
+                        scale_x_discrete(na.translate = FALSE) +
+                        theme_bw() +
+                        coord_flip() +
+        labs(title = "Fisiopatología más frecuente de la variante diarrea", x = "Fisiopatología", y = "Porcentaje de respuestas")
+
+grafico_fisiopato_diarrea
+
+fisiopato_constipacion <- encuesta %>%
+         group_by(`Fisiopatología más frecuente variante constipación`) %>%
+                        summarise(n = n()) %>%
+                        mutate(Proporcion = round((n/sum(n))*100,1)) %>%
+                        ungroup()
+
+grafico_fisiopato_constipacion <- ggplot(fisiopato_constipacion, aes(x= `Fisiopatología más frecuente variante constipación`, y = Proporcion, fill = Proporcion)) +
+                        geom_col(na.rm = T, show.legend = FALSE) + 
+                        scale_x_discrete(na.translate = FALSE) +
+                        theme_bw() +
+                        coord_flip() +
+        labs(title = "Fisiopatología más frecuente de la variante constipación", x = "Fisiopatología", y = "Porcentaje de respuestas")
+
+
+grafico_fisiopato_constipacion               
+```
+
+## Grafico la fisiopatologia de la diarrea de acuerdo a la especialidad
+
+
+```{r}
+
+fisiopato_diarrea_especialidad <- encuesta %>%
+         group_by(`Orientación dicotómica`,`Fisiopatología más frecuente variante diarrea`) %>%
+                        summarise(n = n()) %>%
+                        mutate(Proporcion = round((n/sum(n))*100,1),
+                               media = round(mean(n),1),
+                               mediana = round(median(n),1),
+                               ds = round(sqrt(var(Proporcion)),1),
+            IC25 = round(Proporcion - qnorm(.95)*ds/sqrt(n()),1),
+            IC75 = round(Proporcion + qnorm(.95)*ds/sqrt(n()),1)) %>%
+                        ungroup()
+
+grafico_fisiopato_diarrea_especialidad <- ggplot(fisiopato_diarrea_especialidad, aes(x= `Fisiopatología más frecuente variante diarrea`, y = Proporcion, fill = `Orientación dicotómica`)) +
+                        geom_col(na.rm = T, show.legend = T, position = "dodge") + 
+        geom_errorbar(aes(ymin = IC25, ymax = IC75), position = position_dodge(0.9), width = 0.2) +
+        geom_text(position = position_dodge(width = 1), aes (label = `Proporcion`), vjust = 1.2, hjust = -0.1) +
+                        scale_x_discrete(na.translate = FALSE) +
+                        theme_bw() +
+                        coord_flip() +
+        labs(title = "Fisiopatología más frecuente del SII-D", x = "", y = "Proporción", fill = "Orientación") +
+        expand_limits(y = c(0, 50))
+
+
+grafico_fisiopato_diarrea_especialidad
+
+```
+
+## Grafico la fisiopatologia de la constipacion de acuerdo a la especialidad
+```{r}
+fisiopato_constipacion_especialidad <- encuesta %>%
+         group_by(`Orientación dicotómica`,`Fisiopatología más frecuente variante constipación`) %>%
+                        summarise(n = n()) %>%
+                        mutate(Proporcion = round((n/sum(n))*100,1),
+                               media = round(mean(n),1),
+                               mediana = round(median(n),1),
+                               ds = round(sqrt(var(Proporcion)),1),
+            IC25 = round(Proporcion - qnorm(.95)*ds/sqrt(n()),1),
+            IC75 = round(Proporcion + qnorm(.95)*ds/sqrt(n()),1)) %>%
+                        ungroup()
+
+
+grafico_fisiopato_constipacion_especialidad <- ggplot(fisiopato_constipacion_especialidad, aes(x= `Fisiopatología más frecuente variante constipación`, y = Proporcion, fill = `Orientación dicotómica`)) +
+                        geom_col(na.rm = T, show.legend = T, position = "dodge") + 
+        geom_errorbar(aes(ymin = IC25, ymax = IC75), position = position_dodge(0.9), width = 0.2) +
+        geom_text(position = position_dodge(width = 1), aes (label = `Proporcion`), vjust = 1.2, hjust = -0.1) +
+                        scale_x_discrete(na.translate = FALSE) +
+                        theme_bw() +
+                        coord_flip() +
+        labs(title = "Fisiopatología más frecuente del SII-C", x = "", y = "Proporción", fill = "Orientación") +
+        expand_limits(y = c(0, 50))
+
+
+label.df <- data.frame(Group = c("Obstrucción del tracto de salida", "Tránsito lento"),
+                       Value = c(20, 50))
+
+grafico_fisiopato_constipacion_especialidad   
+
+```
+
+# Chi cuadrado de neurogastro vs no neurogastro de acuerdo a la fisiopatologia. 
+```{r}
+
+## Creo una tabla con las variables a comparar
+tabla_constipacion <- xtabs(Proporcion ~ factor(`Fisiopatología más frecuente variante constipación`) + factor(`Orientación dicotómica`), fisiopato_constipacion_especialidad)
+
+tabla_constipacion
+
+## Aplico chisq por fila (por eso el 1, si fuera por columna sería el 2)
+results <- apply(tabla_constipacion, 1, chisq.test)
+## pido que me tire el valor de p
+sapply(results, "[", "p.value")
+
+results
+
+```
+
+```{r}
+## proporciones e IC95 fisiopatologias
+
+##proporciones diarrea total
+prop.test(30, 303, p = NULL, conf.level = 0.95, correct = T)
+prop.test(82, 303, p = NULL, conf.level = 0.95, correct = T)
+prop.test(13, 303, p = NULL, conf.level = 0.95, correct = T)
+prop.test(150, 303, p = NULL, conf.level = 0.95, correct = T)
+
+## proporciones diarrea dico
+prop.test(5, 53, p = NULL, conf.level = 0.95, correct = T)
+prop.test(23, 53, p = NULL, conf.level = 0.95, correct = T)
+prop.test(4, 53, p = NULL, conf.level = 0.95, correct = T)
+prop.test(16, 53, p = NULL, conf.level = 0.95, correct = T)
+prop.test(134, 250, p = NULL, conf.level = 0.95, correct = T)
+prop.test(59, 250, p = NULL, conf.level = 0.95, correct = T)
+prop.test(25, 250, p = NULL, conf.level = 0.95, correct = T)
+prop.test(20, 250, p = NULL, conf.level = 0.95, correct = T)
+prop.test(9, 250, p = NULL, conf.level = 0.95, correct = T)
+prop.test(3, 250, p = NULL, conf.level = 0.95, correct = T)
+
+## proporciones constipacion total
+prop.test(130, 303, p = NULL, conf.level = 0.95, correct = T)
+prop.test(20, 303, p = NULL, conf.level = 0.95, correct = T)
+prop.test(113, 303, p = NULL, conf.level = 0.95, correct = T)
+prop.test(36, 303, p = NULL, conf.level = 0.95, correct = T)
+prop.test(1, 303, p = NULL, conf.level = 0.95, correct = T)
+
+## no me sirve para characters...
+fisiopato_diarrea_CI <- fisiopato_diarrea %>%
+  group_by(`Orientación dicotómica`, `Fisiopatología más frecuente variante diarrea`) %>%
+  summarise(mean.mpg = mean(as.factor(`Fisiopatología más frecuente variante diarrea`), na.rm = TRUE),
+            sd.mpg = sd(as.factor(`Fisiopatología más frecuente variante diarrea`), na.rm = TRUE),
+            n.mpg = n()) %>%
+  mutate(se.mpg = sd.mpg / sqrt(n.mpg),
+         lower.ci.mpg = mean.mpg - qt(1 - (0.05 / 2), n.mpg - 1) * se.mpg,
+         upper.ci.mpg = mean.mpg + qt(1 - (0.05 / 2), n.mpg - 1) * se.mpg)
+```
+
+
+
+## graficos de datos crudos: proporcion de pacientes con sii
+
+```{r}
+
+proporcion <-"SII mensual"
+
+encuesta[proporcion] <- lapply(encuesta[proporcion], factor, levels = c("0 a 25%", "25 a 50%", "> de 50%"), ordered = T)
+
+
+## proporcion de consultas mensuales
+
+proporcion_sii<- encuesta %>%
+        group_by(`SII mensual`)%>%
+        summarise(n = n()) %>%
+        mutate(Proporcion = round((n/sum(n))*100,1))
+
+
+summary(encuesta$`SII mensual`)
+
+## calculo intervalo de confiaza para SII mensual
+
+prop.test(56, 304, p = NULL, conf.level = 0.95, correct = T)
+prop.test(147, 304, p = NULL, conf.level = 0.95, correct = T)
+prop.test(101, 304, p = NULL, conf.level = 0.95, correct = T)
+
+## invierto el dataframe y transformo las variables en numericas y dejo solo las proporciones para poder hacer un summary y calcular dispersion
+proporcion_sii_invertida <- as.data.frame(t(proporcion_sii))
+proporcion_sii_invertida <- proporcion_sii_invertida[-1,]
+proporcion_sii_invertida$V1 <- as.numeric(proporcion_sii_invertida$V1)
+proporcion_sii_invertida$V2 <- as.numeric(proporcion_sii_invertida$V2)
+proporcion_sii_invertida$V3 <- as.numeric(proporcion_sii_invertida$V3)
+
+names(proporcion_sii_invertida) <- c("< 25%", "25-50", "> 50%")
+
+str(proporcion_sii_invertida)
+
+summary(proporcion_sii_invertida)
+
+
+## proporcion de consultas por edad
+proporcion_sii_edad <- encuesta %>%
+        group_by(Edad_ordinal,`SII mensual`)%>%
+        summarise(n = n()) %>%
+        mutate(Proporcion = round((n/sum(n))*100,1))
+
+ggplot(proporcion_sii_edad, aes(fill = `SII mensual`, y = Proporcion,  x = Edad_ordinal)) +
+        geom_col(position = "dodge")
+
+proporcion_sii_edad
+```
+
+
+
+
+
+## Resultados de diagnostico
+
+
+
+## Separo en neurogastros vs otros
+
+```{r}
+encuesta<- encuesta %>%
+       mutate(`Orientación dicotómica` = if_else(str_detect(`Orientación prioritaria`,regex("Motilidad")), "Neurogastro", "No neurogastro"))
+
+proporcion_sii_orientacion <- encuesta %>%
+        group_by(Edad_ordinal, `Orientación dicotómica`, `SII mensual`)%>%
+        summarise(n = n()) %>%
+        mutate(Proporcion = round((n/sum(n))*100,1))
+
+ggplot(proporcion_sii_orientacion, aes(fill = `SII mensual`, y = Proporcion,  x = `Orientación dicotómica`)) +
+        geom_col(position = "dodge") + 
+        theme(axis.text.x=element_blank()) +
+        geom_text(position = position_dodge2(width = 1), aes (label = `Proporcion`), vjust = -0.5) +
+        facet_wrap(~Edad_ordinal, scales="free", ncol = 2) +
+        labs(title = "Proporción de consultas mensuales por SII", x = "Especialidad", y = "% de profesionales", fill = "Consultas mensuales") +
+        expand_limits (y = c(0, 70))
+
+summary(proporcion_sii_edad)
+
+```
+
+
+
+
+## Metas en el tratamiento por edad
+
+```{r}
+chisq.test(encuesta$`Meta principal endel tratamiento del SII`, encuesta$Edad_ordinal)
+
+
+edad_metas <- encuesta %>%
+                        group_by(Edad_ordinal, `Meta principal endel tratamiento del SII`) %>%
+                        summarise(n = n()) %>%
+                        na.omit()%>%
+                        mutate(Proporcion = round((n/sum(n))*100,1)) %>%
+                        ungroup()
+
+
+as.factor(edad_metas$`Meta principal endel tratamiento del SII`)
+
+
+
+ggplot(edad_metas, aes(x=Edad_ordinal, y = Proporcion, fill = `Meta principal endel tratamiento del SII`)) +
+        geom_col(position = "dodge") +
+        geom_text(position = position_dodge2(width = 1), aes (label = `Proporcion`), vjust = -0.5) +
+       labs(title = "Metas del tratamiento del SII en funcion de la edad", subtitle = "X-squared = 4.0575, df = 2, p-value = 0.1315", x = "Edad", y = "%", fill = "Meta principal") +
+        expand_limits(y = c(0, 95)) +
+        scale_fill_manual(values = c("aquamarine3", "darkorchid3"))
+
+
+edad_metas2 <- encuesta %>%
+                       count(`Meta principal endel tratamiento del SII`, Edad_ordinal) %>%
+                       na.omit()%>%
+        pivot_wider(names_from = `Meta principal endel tratamiento del SII`, values_from = n, values_fill = 0) %>%
+                adorn_percentages("row") %>%
+        adorn_pct_formatting(digits = 1) %>%
+        adorn_ns() 
+
+ggplot(edad_metas, aes(x=Edad_ordinal, y = Proporcion, fill = `Meta principal endel tratamiento del SII`)) +
+        geom_col(position = "dodge") +
+        geom_text(position = position_dodge2(width = 1), aes (label = paste(`Proporcion`,"(", n,")")), vjust = -0.5) +
+       labs(title = "Metas del tratamiento del SII en funcion de la edad", subtitle = "X-squared = 4.0575, df = 2, p-value = 0.1315", x = "Edad", y = "% (n)", fill = "Meta principal") +
+        expand_limits(y = c(0, 95)) +
+        scale_fill_manual(values = c("aquamarine3", "darkorchid3"))
+```
+
+
+
+
+
+
+
+
+
+
+## Resultados tratamiento
+
+### Creo un df de efectividad de tratamiento diarrea
+
+```{r, results='asis'}
+efectividad_tto_diarrea <- encuesta[,c(18:32)] %>%
+         pivot_longer(cols = everything()) %>%
+  count(name, value) %>%
+  pivot_wider(names_from = value, values_from = n, values_fill = 0) %>%
+                arrange(desc(`muy efectiva`)) %>%
+  adorn_percentages("row") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns()
+
+# remuevo "en diarrea"
+efectividad_tto_diarrea$name <- str_remove(efectividad_tto_diarrea$name, " en diarrea")
+
+# remuevo nombre de la primera columna
+colnames(efectividad_tto_diarrea)[1] <- ""
+
+tabla_tto_diarrea <- efectividad_tto_diarrea %>%
+          kable(caption = 'Efectividad considerada para diversos tratamientos del SII-D') %>%
+  kable_styling(bootstrap_options = c("striped", "hover")) %>%
+   kable_classic(full_width = F, html_font = "Arial")
+
+ 
+tabla_tto_diarrea
+
+```
+
+## Hago uno similar pero dicotomizado "efectivo" (algo y muy) vs "no efectivo"
+
+```{r}
+
+efectividad_tto_diarrea_dico <- encuesta[,c(18:32)] %>%
+         pivot_longer(cols = everything()) %>%
+  count(name, value) %>%
+  pivot_wider(names_from = value, values_from = n, values_fill = 0) %>%
+        mutate("efectiva" = `algo efectiva` + `muy efectiva`) %>%
+arrange(desc(`efectiva`))%>%
+        select(c(`name`,`efectiva`, `no efectiva`)) %>%
+          adorn_percentages("row") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns()
+
+# remuevo "en diarrea"
+efectividad_tto_diarrea_dico$name <- str_remove(efectividad_tto_diarrea_dico$name, " en diarrea")
+
+# remuevo nombre de la primera columna
+colnames(efectividad_tto_diarrea_dico)[1] <- ""
+
+tabla_tto_diarrea_dico <- efectividad_tto_diarrea_dico %>%
+          kable(caption = 'Efectividad considerada para diversos tratamientos del SII-D') %>%
+  kable_styling(bootstrap_options = c("striped", "hover")) %>%
+   kable_classic(full_width = F, html_font = "Arial")
+
+tabla_tto_diarrea_dico 
+```
+
+
+## Hago uno separando neurogastros de no neuro
+
+```{r}
+tto_diarrea_neurogastro<- encuesta[,c(18:32,75)] %>%
+        filter(`Orientación dicotómica` == "Neurogastro") %>%
+        pivot_longer(cols = everything()) %>%
+          count(name, value) %>%
+  pivot_wider(names_from = value, values_from = n, values_fill = 0) %>%
+        mutate("efectiva" = `algo efectiva` + `muy efectiva`)  %>%
+        select(c(`name`,`efectiva`, `no efectiva`)) %>%
+          adorn_percentages("row") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns() 
+
+
+# si quiero orden descendente de efectividad: 
+# %>%
+# arrange(desc(`efectiva`))
+
+
+tto_diarrea_otros <- encuesta[,c(18:32,75)] %>%
+        filter(`Orientación dicotómica` != "Neurogastro") %>%
+        pivot_longer(cols = everything()) %>%
+          count(name, value) %>%
+  pivot_wider(names_from = value, values_from = n, values_fill = 0) %>%
+        mutate("efectiva" = `algo efectiva` + `muy efectiva`) %>%
+        select(c(`name`,`efectiva`, `no efectiva`)) %>%
+          adorn_percentages("row") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns() 
+
+# si quiero orden descendente de efectividad: 
+# %>%
+# arrange(desc(`efectiva`))
+
+
+# remuevo "en diarrea"
+tto_diarrea_neurogastro$name <- str_remove(tto_diarrea_neurogastro$name, " en diarrea")
+tto_diarrea_otros$name <- str_remove(tto_diarrea_otros$name, " en diarrea")
+
+
+## elimino la fila de dicotomica y las columnas repetidas
+tto_diarrea_neurogastro<- tto_diarrea_neurogastro[-(9),]
+tto_diarrea_otros <- tto_diarrea_otros[-(9),]
+
+# remuevo nombre de la primera columna
+colnames(tto_diarrea_neurogastro)[1] <- ""
+colnames(tto_diarrea_otros)[1] <- ""
+
+
+# Creo las tablas
+tabla_diarrea_neurogastro<- tto_diarrea_neurogastro %>%
+          kable(caption = 'Efectividad considerada por neurogastros para diversos tratamientos del SII-D') %>%
+  kable_styling(bootstrap_options = c("striped", "hover")) %>%
+   kable_classic(full_width = F, html_font = "Arial")
+
+tabla_diarrea_neurogastro
+
+tabla_diarrea_otros<- tto_diarrea_otros %>%
+          kable(caption = 'Efectividad considerada por otros especialistas para diversos tratamientos del SII-D') %>%
+  kable_styling(bootstrap_options = c("striped", "hover")) %>%
+   kable_classic(full_width = F, html_font = "Arial")
+
+tabla_diarrea_otros
+```
+
+
+
+## Junto los 2 dfs de diarrea en uno solo
+
+```{r}
+
+df_tto <- cbind(tto_diarrea_neurogastro,tto_diarrea_otros) 
+
+## esto no se para que está....
+df_final <- as.data.frame(as.matrix(df_tto[-4]) %>%
+  list(name = df_tto$name, Neurogastro = df_tto[, c(2,3)], No_neurogastro = df_tto[,c(5,6)])) 
+## elimino la ultima fila y las columnas repetidas (esto no va)
+df_final <- df_final[-(16),-(2:6)]
+
+
+# remuevo "en diarrea" y renombro las columnas
+df_tto$Var.1 <- str_remove(df_tto$Var.1, " en diarrea")
+df_tto$Var.4 <- str_remove(df_tto$Var.4, " en diarrea")
+colnames(df_tto)[1] <- ""
+colnames(df_tto)[4] <- ""
+colnames(df_tto)[2] <- "Efectiva"
+colnames(df_tto)[3] <- "No efectiva"
+colnames(df_tto)[5] <- "Efectiva"
+colnames(df_tto)[6] <- "No efectiva"
+
+##Creo tabla
+
+tabla_final_diarrea <- df_tto %>%
+          kable(caption = 'Efectividad considerada para diversos tratamientos del SII-D') %>%
+  kable_styling(bootstrap_options = c("striped", "hover")) %>%
+   kable_classic(full_width = F, html_font = "Arial")
+
+tabla_final_diarrea 
+
+chisq.test(df_tto[,2], df_tto[,5])
+chisq.test(df_tto[,3], df_tto[,6])
+
+df1 <- cbind(df_tto, t(apply(df_tto, 1, function(x) {
+             ch <- chisq.test(x)
+             c(unname(ch$statistic), ch$p.value)})))
+
+ colnames(df1)[3:4] <- c('x-squared', 'p-value')
+```
+
+
+## Resultados tratamiento
+
+### Creo un df de efectividad de tratamiento constipacion
+
+```{r}
+efectividad_tto_constipacion <- encuesta[,c(33:43)] %>%
+         pivot_longer(cols = everything()) %>%
+  count(name, value) %>%
+  pivot_wider(names_from = value, values_from = n, values_fill = 0) %>%
+                arrange(desc(`muy efectiva`)) %>%
+          adorn_percentages("row") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns()
+
+# remuevo "en estreñimiento"
+efectividad_tto_constipacion$name <- str_remove(efectividad_tto_constipacion$name, " en estreñimiento")
+
+# remuevo nombre de la primera columna
+colnames(efectividad_tto_constipacion)[1] <- ""
+
+tabla_tto_constipacion <- efectividad_tto_constipacion %>%
+          kbl(caption = "Efectividad considerada para diversos tratamientos del SII-C") %>%
+  kable_styling(bootstrap_options = c("striped", "hover")) %>%
+   kable_classic(full_width = F, html_font = "Arial")
+
+ 
+tabla_tto_constipacion
+
+```
+
+## dicotomizado
+
+```{r}
+efectividad_tto_constipacion_dico <- encuesta[,c(33:43)] %>%
+         pivot_longer(cols = everything()) %>%
+  count(name, value) %>%
+  pivot_wider(names_from = value, values_from = n, values_fill = 0) %>%
+        mutate("efectiva" = `algo efectiva` + `muy efectiva`) %>%
+        select(c(`name`,`efectiva`, `no efectiva`)) %>%
+          adorn_percentages("row") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns() %>%
+ arrange(desc(`efectiva`))
+
+# remuevo "en diarrea"
+efectividad_tto_constipacion_dico$name <- str_remove(efectividad_tto_constipacion_dico$name, " en estreñimiento")
+
+# remuevo nombre de la primera columna
+colnames(efectividad_tto_constipacion_dico)[1] <- ""
+
+tabla_tto_constipacion_dico <- efectividad_tto_constipacion_dico %>%
+          kable(caption = 'Efectividad considerada para diversos tratamientos del SII-C') %>%
+  kable_styling(bootstrap_options = c("striped", "hover")) %>%
+   kable_classic(full_width = F, html_font = "Arial")
+
+ 
+tabla_tto_constipacion_dico    
+```
+
+## Hago la separacion por especialidad para constipacion
+```{r}
+tto_constipacion_neurogastro<- encuesta[,c(33:43,75)] %>%
+        filter(`Orientación dicotómica` == "Neurogastro") %>%
+        pivot_longer(cols = everything()) %>%
+          count(value, name) %>%
+  pivot_wider(names_from = value, values_from = n, values_fill = 0) %>%
+        mutate("efectiva" = `algo efectiva` + `muy efectiva`) %>%
+        select(c(`name`,`efectiva`, `no efectiva`)) %>%
+          adorn_percentages("row")%>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns() 
+
+        
+
+tto_constipacion_otros <- encuesta[,c(33:43, 75)] %>%
+        filter(`Orientación dicotómica` != "Neurogastro") %>%
+        pivot_longer(cols = everything()) %>%
+          count(name, value) %>%
+  pivot_wider(names_from = value, values_from = n, values_fill = 0) %>%
+        mutate("efectiva" = `algo efectiva` + `muy efectiva`) %>%
+        select(c(`name`,`efectiva`, `no efectiva`)) %>%
+          adorn_percentages("row")%>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns()
+
+
+
+# remuevo "en estreñimiento"
+tto_constipacion_neurogastro$name <- str_remove(tto_constipacion_neurogastro$name, " en estreñimiento")
+tto_constipacion_otros$name <- str_remove(tto_constipacion_otros$name, " en estreñimiento")
+
+
+## elimino la ultima fila y las columnas repetidas
+tto_constipacion_neurogastro<- tto_constipacion_neurogastro[-(12),]
+tto_constipacion_otros <- tto_constipacion_otros[-(6),]
+
+# remuevo nombre de la primera columna
+colnames(tto_constipacion_neurogastro)[1] <- "neuro"
+colnames(tto_constipacion_otros)[1] <- "otros"
+
+
+# Creo las tablas
+tabla_constipacion_neurogastro<- tto_constipacion_neurogastro %>%
+          kable(caption = 'Efectividad considerada por neurogastros para diversos tratamientos del SII-C') %>%
+  kable_styling(bootstrap_options = c("striped", "hover")) %>%
+   kable_classic(full_width = F, html_font = "Arial")
+
+tabla_constipacion_neurogastro
+
+tabla_constipacion_otros<- tto_constipacion_otros %>%
+          kable(caption = 'Efectividad considerada por otros especialistas para diversos tratamientos del SII-C') %>%
+  kable_styling(bootstrap_options = c("striped", "hover")) %>%
+   kable_classic(full_width = F, html_font = "Arial")
+
+tabla_constipacion_otros
+        
+    
+## tengo que unir tablas de otra forma porque no tienen el mismo orden
+df_final_constipacion <- cbind(tto_constipacion_neurogastro,tto_constipacion_otros) 
+
+
+
+# remuevo "en diarrea" y renombro columnas
+colnames(df_final_constipacion)[1] <- ""
+colnames(df_final_constipacion)[4] <- ""
+colnames(df_final_constipacion)[2] <- "Efectiva"
+colnames(df_final_constipacion)[3] <- "No efectiva"
+colnames(df_final_constipacion)[5] <- "Efectiva"
+colnames(df_final_constipacion)[6] <- "No efectiva"
+
+##creo tabla
+
+tabla_final_constipacion<- df_final_constipacion %>%
+          kable(caption = 'Efectividad considerada para diversos tratamientos del SII-C') %>%
+  kable_styling(bootstrap_options = c("striped", "hover")) %>%
+   kable_classic(full_width = F, html_font = "Arial")
+
+tabla_final_constipacion
+
+## (esta parte no es util)  
+df_final_constipacion <- as.data.frame(as.matrix(df_tto_constipacion[-4]) %>%
+  list(name = df_tto_constipacion$name, Neurogastro = df_tto_constipacion[, c(2,3)], No_neurogastro = df_tto_constipacion[,c(5,6)]))
+
+## elimino la ultima fila y las columnas repetidas
+df_final_constipacion <- df_final_constipacion[-(12),-(2:6)]
+```
+
+
+
+## Construyo una tabla 1
+
+```{r}
+
+library(tableone)
+
+listVars <- c("Edad", "Región de residencia", "Orientación dicotómica", "Centro médico", "Consultorio privado", "Hospital")
+
+catVars <- c("Región de residencia", "Orientación dicotomica", "Centro médico", "Consultorio privado", "Hospital")
+
+table1 <- CreateTableOne(vars = listVars, data = encuesta, factorVars = catVars, strata = c("Genero"))
+
+a <- print(table1, quote = F, noSpaces = F)
+
+as.data.frame(a)
+
+tabla1 <- a %>%
+        kable(caption = 'Tabla 1') %>%
+  kable_styling(bootstrap_options = c("striped", "hover")) %>%
+   kable_classic(full_width = F, html_font = "Arial")
+
+```
+
+## mejor version de tabla 1
+
+```{r}
+
+library(table1)
+
+encuesta2<-encuesta
+
+encuesta2$`Centro médico` <-
+        factor(encuesta2$`Centro médico`, 
+               levels = c(0,1),
+               labels = c("Sí","No"))
+
+encuesta2$`Consultorio privado` <-
+        factor(encuesta2$`Consultorio privado`, 
+               levels = c(0,1),
+               labels = c("Sí","No"))
+
+encuesta2$`Hospital` <-
+        factor(encuesta2$`Hospital`, 
+               levels = c(0,1),
+               labels = c("Sí","No"))
+
+## copio la funcion para sacar media y proporción
+
+my.render.cont <- function(x) {
+    with(stats.apply.rounding(stats.default(x), digits=3, digits.pct = 1), c("",
+        "Media (DS)"=sprintf("%s (&plusmn; %s)", MEAN , SD)))
+}
+my.render.cat <- function(x) { 
+    c("", sapply(stats.default(x), function(y) with(y,
+        sprintf("%d (%0.1f %%)", FREQ, PCT))))
+
+}
+ 
+       
+##creo quna funcion para calcular la p
+
+pvalue <- function(x, ...) {
+    # Construct vectors of data y, and groups (strata) g
+    y <- unlist(x)
+    g <- factor(rep(1:length(x), times=sapply(x, length)))
+    if (is.numeric(y)) {
+        # For numeric variables, perform a standard 2-sample t-test
+        p <- t.test(y ~ g)$p.value
+    } else {
+        # For categorical variables, perform a chi-squared test of independence
+        p <- chisq.test(table(y, g))$p.value
+    }
+    # Format the p-value, using an HTML entity for the less-than sign.
+    # The initial empty string places the output on the line below the variable label.
+    c("", sub("<", "&lt;", format.pval(p, digits=1, eps=0.001)))
+}
+
+
+tabla1 <- table1( ~Edad + `Región de residencia` + `Orientación dicotómica` + `Centro médico` + `Consultorio privado` + `Hospital`|Genero, data=encuesta2, overall=F, render.missing=NULL, render.continuous=my.render.cont, render.categorical=my.render.cat, extra.col=list(`P-valor`=pvalue))
+
+
+## version con especialidad en columna
+tabla2 <- table1( ~Edad + `Región de residencia` + `Centro médico` + `Consultorio privado` + `Hospital`| `Orientación dicotómica`*Genero, data=encuesta2, overall= F, render.continuous=my.render.cont, render.categorical=my.render.cat)
+
+
+format(my.render.cat, decimal.mark=",")
+
+
+tabla1
+
+
+Sys.setlocale("LC_NUMERIC", "")
+
+Sys.getlocale("LC_NUMERIC")
+
+sprintf("%f",1.5)
+```
+
+
+
+## Analisis multivariado
+
+```{r}
+
+encuesta_filtrada <- encuesta %>%
+        filter
+
+
+library(survey)
+
+diseno <- svydesign(data = encuesta, repweights = NULL)
+
+analisis_multivar <- svyglm(encuesta~ Edad + factor(Genero) + factor('Región de residencia') + factor('Orientación dicotomica') + factor('Lugar de Trabajo'), design=diseno)
+```
+
+
+
+
+## Efectividad rifaximina en funcion de edad
+
+```{r}
+
+efectividad_rifa <- encuesta[,c(33:43,81)] %>%
+        group_by()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Esfera psi: meta principal del tto
+
+```{r}
+unique(encuesta$`Meta principal endel tratamiento del SII`)
+
+meta_tto_edad <- encuesta %>%
+        group_by(Edad_ordinal, `Meta principal endel tratamiento del SII`)%>%
+         summarise(n = n()) %>%
+        na.omit()%>%
+        mutate(Proporcion = round((n/sum(n))*100,1))
+
+
+ggplot(meta_tto_edad, aes(fill = `Meta principal endel tratamiento del SII`, y = Proporcion,  x = Edad_ordinal)) +
+        geom_col(position = "dodge") +
+        geom_text(position = position_dodge(width = 1), aes (label = `Proporcion`), vjust = -0.5) +
+        labs(title = "Meta del tratamiento por edad", subtitle = "X-squared = 4.0575, df = 2, p-value = 0.1315", x = "Edad", y = "Proporción") +
+        scale_y_continuous(labels = function(x) paste0(x, "%"))
+
+chisq.test(encuesta$Edad_ordinal, encuesta$`Meta principal endel tratamiento del SII`)
+
+kruskal.test(`Meta principal endel tratamiento del SII` ~ n, data=meta_tto_edad) 
+
+meta_tto_genero <- encuesta %>%
+        group_by(Genero, `Meta principal endel tratamiento del SII`)%>%
+         summarise(n = n()) %>%
+        na.omit()%>%
+        mutate(Proporcion = round((n/sum(n))*100,1))
+
+ggplot(meta_tto_genero, aes(fill = `Meta principal endel tratamiento del SII`, y = Proporcion,  x = Genero)) +
+        geom_col(position = "dodge") +
+          geom_text(position = position_dodge(width = 1), aes (label = `Proporcion`), vjust = -0.5) +
+        labs(title = "Meta del tratamiento por género", subtitle = "X-squared = 0.51543, df = 1, p-value = 0.4728", x = "Género", y = "Proporción") +
+        scale_y_continuous(labels = function(x) paste0(x, "%"))
+
+
+chisq.test(encuesta$Genero, encuesta$`Meta principal endel tratamiento del SII`)
+kruskal.test(`Meta principal endel tratamiento del SII` ~ n, data=meta_tto_genero) 
+
+```
+
+
+## Esfera psi: nivel de frustacion
+
+```{r}
+
+frustracion <-"Nivel de frustración"
+encuesta[frustracion] <- lapply(encuesta[frustracion], factor, levels = c("Nada", "Un poco", "Mucho"), ordered = T)
+
+frustracion_edad <- encuesta %>%
+        group_by(Edad_ordinal, `Nivel de frustración`)%>%
+        summarise(n = n()) %>%
+        na.omit()%>%
+        mutate(Proporcion = round((n/sum(n))*100,1))
+
+chisq.test(encuesta$Edad_ordinal, encuesta$`Nivel de frustración`)
+
+##prop.trend.test(frustracion_edad_pivot)
+
+
+ggplot(frustracion_edad, aes(fill = `Nivel de frustración`, y = Proporcion,  x = Edad_ordinal)) +
+        geom_col(position = "dodge") +
+        geom_text(position = position_dodge(width = 1), aes (label = `Proporcion`), vjust = -0.5) +
+        labs(title = "Nivel de frustración si el paciente no mejora en 2-3 consultas según edad", subtitle = "X-squared = 9.6931, df = 4, p-value = 0.04593", x = "Edad", y = "Proporción") +
+        scale_y_continuous(labels = function(x) paste0(x, "%"))
+
+
+frustracion_genero <- encuesta %>%
+        group_by(Genero, `Nivel de frustración`)%>%
+        summarise(n = n()) %>%
+        na.omit()%>%
+        mutate(Proporcion = round((n/sum(n))*100,1))
+
+chisq.test(encuesta$Genero, encuesta$`Nivel de frustración`)
+
+
+ggplot(frustracion_genero, aes(fill = `Nivel de frustración`, y = Proporcion,  x = Genero)) +
+        geom_col(position = "dodge") +
+        geom_text(position = position_dodge(width = 1), aes (label = `Proporcion`), vjust = -0.5) +
+        labs(title = "Nivel de frustración si el paciente no mejora en 2-3 consultas según edad", subtitle = "X-squared = 13.164, df = 2, p-value = 0.001385", x = "Género", y = "Proporción") +
+        scale_y_continuous(labels = function(x) paste0(x, "%"))
+
+frustracion_genero_dico <- encuesta %>%
+       mutate(`Nivel de frustración` = case_when(`Nivel de frustración` %in% "Nada" ~ "No frustrado", 
+                                                  `Nivel de frustración` %in% "Un poco" | `Nivel de frustración` %in% "Mucho" ~"Frustrado"))%>%
+        group_by(Genero, `Nivel de frustración`)%>%
+        summarise(n = n()) %>%
+        na.omit()%>%
+        mutate(Proporcion = round((n/sum(n))*100,1))
+        
+
+frustracion_genero_pivot <- frustracion_genero_dico%>%
+        select(-Proporcion) %>%
+        pivot_wider(names_from = `Nivel de frustración`, values_from = n)
+
+
+
+## como crear una tabla desde el df
+
+tabla_genero_pivot <- type.convert(frustracion_genero_pivot,as.is = TRUE)
+        
+tabla <- `dimnames<-`(
+  as.table(as.matrix(frustracion_genero_pivot[-1])),
+  list(Genero = frustracion_genero_pivot$Genero, Frustrado = c("si", "No"))
+)
+
+fisher.test(frustracion_genero_pivot [,-1])
+fisher.test(tabla)
+chisq.test(tabla)
+
+ggplot(frustracion_genero_dico, aes(fill = `Nivel de frustración`, y = Proporcion,  x = Genero)) +
+        geom_col(position = "dodge") +
+        geom_text(position = position_dodge(width = 1), aes (label = `Proporcion`), vjust = -0.5) +
+        labs(title = "Nivel de frustración si el paciente no mejora en 2-3 consultas según edad", subtitle = "X-squared = 0.087772, df = 1, p-value = 0.767", x = "Género", y = "Proporción") +
+        scale_y_continuous(labels = function(x) paste0(x, "%"))
+
+cumsum(frustracion_genero_dico$n)
+```
+
+
+## Esfera psi: tratamiento y género
+
+
+```{r}
+
+names(encuesta)
+
+complejidad_genero_edad<- encuesta %>%
+        group_by(Edad_ordinal, `Tratamiento más complejo en género`)%>%
+        summarise(n = n()) %>%
+        na.omit()%>%
+        mutate(Proporcion = round((n/sum(n))*100,1)) %>%
+        ungroup
+
+chisq.test(encuesta$Edad_ordinal, encuesta$`Tratamiento más complejo en género`)
+
+ggplot(complejidad_genero_edad, aes(fill = `Tratamiento más complejo en género`, y = Proporcion,  x = Edad_ordinal)) +
+        geom_col(position = "dodge") +
+        geom_text(position = position_dodge(width = 1), aes (label = `Proporcion`), vjust = -0.5) +
+        labs(title = "Complejidad de tratamiento por género de acuerdo a la edad ", subtitle = "X-squared = 5.6363, df = 4, p-value = 0.228", x = "Edad", y = "Proporción") +
+        scale_y_continuous(labels = function(x) paste0(x, "%"))
+
+
+complejidad_genero_genero<- encuesta %>%
+        group_by(Genero, `Tratamiento más complejo en género`)%>%
+        summarise(n = n()) %>%
+        na.omit()%>%
+        mutate(Proporcion = round((n/sum(n))*100,1)) %>%
+        ungroup
+
+chisq.test(encuesta$Genero, encuesta$`Tratamiento más complejo en género`)
+
+ggplot(complejidad_genero_genero, aes(fill = `Tratamiento más complejo en género`, y = Proporcion,  x = Genero)) +
+        geom_col(position = "dodge") +
+        geom_text(position = position_dodge(width = 1), aes (label = `Proporcion`), vjust = -0.5) +
+        labs(title = "Complejidad de tratamiento por género de acuerdo al género del médico", subtitle = "X-squared = 1.9091, df = 2, p-value = 0.385", x = "Género", y = "Proporción") +
+        scale_y_continuous(labels = function(x) paste0(x, "%"))
+
+
+## veo si hay diferencias entre hombre mujer, excluyendo los que no econtraron diferencias
+
+tabla_genero_tto <- table(x = encuesta$Genero, y = encuesta$`Tratamiento más complejo en género`)
+
+tabla_genero_tto <- tabla[,-3]
+
+chisq.test(tabla_genero_tto)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Fisiopatologia y especialidad
+
+```{r}
+
+diarrea2 <- encuesta[,c(14,74:79)]
+
+diarrea_especialidad <- fisio_dico %>% 
+                        group_by(`Fisiopatología más frecuente variante diarrea`) %>%
+                        na.omit() %>%
+                        summarise_all(funs(sum)) %>%
+                        mutate("Otras orientaciones" = `Cirugia` + `Hepatología` + `Endoscopia digestiva` + `Gastroenterología clinica` + `Pancreatologia`, .keep = "unused")
+
+
+orientacion_motilidad <- encuesta%>%
+        mutate(`Motilidad` = if_else(str_detect(`Orientación prioritaria`,regex("Motilidad")), 1, 0))
+
+fisio_dico
+
+
+```
+## Grafico de fisiopatologia en funcion de la especialidad
+
+```{r}
+
+ggplot(diarrea_especialidad, 
+       aes(x= `Fisiopatología más frecuente variante diarrea`, y = `Motilidad y Neurogastro`)) +
+        geom_point() +
+  labs(title = 'Correlacion entre fisiopatología y especialidad')+
+  geom_smooth(method = 'glm',
+              method.args = list(family = "binomial"),
+              color = "blue",
+              se = FALSE) +
+        coord_flip()
+```
+
+
+
+## grafico los tratamientos en funcion de la fisiopatologia: bimuto
+
+```{r}
+
+bismuto <- diarrea %>%
+        select(c(`Fisiopatología más frecuente variante diarrea`, Bismuto)) %>%
+        group_by(`Fisiopatología más frecuente variante diarrea`, Bismuto) %>%
+        summarise(n = n()) %>%
+        mutate(Proporcion = round((n/sum(n))*100,1)) %>%
+        ungroup()
+
+
+chisq.test(bismuto$`Fisiopatología más frecuente variante diarrea`, bismuto$Bismuto)
+
+
+grafico_bismuto <- ggplot(bismuto,
+                          aes( x = `Fisiopatología más frecuente variante diarrea`, y = Proporcion, fill= Bismuto))+
+                        geom_col(stat = "identity", position = "dodge") +
+                        theme_bw() +
+                        coord_flip() +
+                        scale_x_discrete(na.translate = FALSE) +
+        labs(title = "Efectividad del bismuto según la fisiopatología de la diarrea", x = "Fisiopatología de la diarrea", y = "Porcentaje de respuestas")
+
+grafico_bismuto
+```
+
+## Rifaximina
+
+```{r}
+
+rifaximina <- diarrea %>%
+        select(c(`Fisiopatología más frecuente variante diarrea`, Rifaximina)) %>%
+        group_by(`Fisiopatología más frecuente variante diarrea`, Rifaximina) %>%
+        summarise(n = n()) %>%
+        mutate(Proporcion = round((n/sum(n))*100,1)) %>%
+        ungroup()
+
+grafico_rifaximina <- ggplot(rifaximina,
+                          aes( x = `Fisiopatología más frecuente variante diarrea`, y = Proporcion, fill= Rifaximina))+
+                        geom_col(stat = "identity", position = "dodge") +
+                        theme_bw() +
+                        coord_flip() +
+                        scale_x_discrete(na.translate = FALSE) +
+        labs(title = "Efectividad de la rifaximina según la fisiopatología de la diarrea", x = "Fisiopatología de la diarrea", y = "Porcentaje de respuestas")
+
+grafico_rifaximina
+
+```
+
+## Otros medicamentos
+
+```{r}
+otros_tratamientos <- diarrea %>%
+        group_by(`Fisiopatología más frecuente variante diarrea`) %>%
+        summarise(n = n()) %>%
+        mutate(Proporcion = round((n/sum(n))*100,1)) %>%
+        ungroup()
+
+head(otros_tratamientos)
+```
+
+
+
+```{r}
+
+postinfeccion <- diarrea %>%
+        filter(`Fisiopatología más frecuente variante diarrea` == "Post infección")
+
+medicamentos <- diarrea %>%
+        filter(`Fisiopatología más frecuente variante diarrea` == "Medicamentos")
+
+
+sales_biliares <- diarrea %>%
+        filter(`Fisiopatología más frecuente variante diarrea` ==  "Malabsorción de sales biliares")
+
+
+disbiosis <- diarrea %>%
+        filter(`Fisiopatología más frecuente variante diarrea` ==  "Disbiosis / Sobrecrecimiento bacteriano")
+
+
+dieta <- diarrea %>%
+        filter(`Fisiopatología más frecuente variante diarrea` == "Dieta" )
+
+
+```
+
+## Dicotomizo las variables categoricas para el analisis
+
+```{r}
+
+encuesta_dico <- encuesta %>%
+                mutate(Edad_ordinal = cut(Edad, 11, labels=c("26-30","31-35","36-40","41-45","46-50","51-55","56-60","61-65","66-70","71-75","76+")),
+                       Genero_dico = recode(Genero, "Hombre" = 1, "Mujer" = 2))%>%
+       cbind(mtabulate(strsplit(encuesta$`Orientación prioritaria`, ";")), mtabulate(strsplit(encuesta$`Lugar de Trabajo`, "y")), mtabulate(encuesta$`Fisiopatología más frecuente variante diarrea`))
+
+
+cols <- c("Loperamida en diarrea", "Carbón en diarrea",  "Bismuto en diarrea", "Rifaximina en diarrea", "Otros antibióticos en diarrea",    "Probióticos en diarrea", "Trimebutina en diarrea", "Trimebutina/simeticona en diarrea", "Alverina/simeticona en diarrea", "Pinaverio en diarrea", "Otilonio en diarrea", "Colestiramina en diarrea", "Amitriptilina en diarrea", "Antiespasmódicos en diarrea", "Dieta en diarrea","Polietilenglicol en estreñimiento","Psyllium en estreñimiento", "Lactulosa en estreñimiento", "Linaclotida en estreñimiento", "Prucalopride en estreñimiento", "Sales biliares en estreñimiento" , "Trimebutina en estreñimiento", "Bisacodilo/picosulfato en estreñimiento", "Antibióticos en estreñimiento", "Senósidos en estreñimiento", "Dieta en estreñimiento" )
+
+encuesta_dico[cols] <- lapply(encuesta_dico[cols], factor, levels = c("No efectiva", "No se", "No Se","Algo efectiva", "Muy efectiva"), ordered = T)
+
+encuesta_dico[encuesta_dico == "No se" |encuesta_dico == "No Se" | encuesta_dico == "No efectiva"] <- 1
+
+encuesta_dico[cols] <- lapply(encuesta_dico[cols], recode, "No efectiva" = 1, "No se" = 2, "Algo efectiva" = 3, "Muy efectiva" = 4)
+
+numerizar <- function(x){
+  list(recode(x, "No efectiva" = 1, "No se" = 2, "Algo efectiva" = 3, "Muy efectiva" = 4), as.numeric(x))
+}
+
+encuesta_dico[cols] <- sapply(encuesta_dico[cols], numerizar)
+
+str(encuesta_dico)
+
+```
+
+
+
+
+
+```{r}
+diarrea_tto <- encuesta_dico [, c(18:32, 90:95)] %>%
+        
+str(diarrea_tto)
+
+cc = cor(diarrea_tto, method = "spearman")
+
+library(corrplot)
+
+corr<- corrplot(cc, tl.col = "black", order = "hclust", hclust.method = "average", addrect = 4, tl.cex = 0.7, method = "square", addCoef.col = TRUE, number.cex=0.5)
+
+corr
+
+library(GGally)
+
+pares <- ggpairs(diarrea_tto, 
+        aes(color = ), 
+        upper = list(continuous = wrap("cor", size = 1)),
+        #upper = list(continuous = "density", combo = "dot_no_facet"),
+        lower = list(continuous = "points", combo = "box_no_facet")
+        ) + theme_bw()
+```
+
+
